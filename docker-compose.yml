@@ -1,0 +1,19 @@
+services:
+  paper:
+    build: ./
+    tty: true
+    container_name: time_encoder
+    volumes:
+      - .:/usr/src/code
+      - /usr/src/code/.venv
+    ports:
+      - "5000:5000"
+    working_dir: /usr/src/code/
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
