@@ -1,0 +1,14 @@
+TSClassifier:
+  deep: true
+  encoder:
+    ts_encoding:
+      encoder_class: RNN
+      hidden_size: 100
+      num_layers: 1
+      batch_first: True
+    time_encoding:
+      time_encoding_class: PositionalEncoding
+      time_encoding_size: 50
+      dropout: 0.0
+  decoder:
+    hidden_size: 100

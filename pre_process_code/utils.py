@@ -88,11 +88,7 @@ def pre_process_step(
         path=pmiss_path,
     )
     print("----> Imputing data points")
-    X_imp = impute(
-        X_nan=X_nan,
-        n_instances=n_instances,
-        imputer=imputer,
-    )
+    X_imp = impute(X_nan=X_nan, n_instances=n_instances, imputer=imputer)
     write_to_tsfile(
         X=X_imp,
         y=y_test,
