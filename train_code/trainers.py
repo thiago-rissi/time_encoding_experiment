@@ -8,18 +8,11 @@ import torch
 from tqdm import tqdm
 from torch.nn import CrossEntropyLoss
 import numpy as np
+import pickle
 
 
 def save_model(model, outputfile: pathlib.Path):
     torch.save(model.state_dict(), outputfile)
-
-
-class GeneralTrainer:
-    def __init__(self) -> None:
-        pass
-
-    def train(self):
-        pass
 
 
 class DeepTrainer:
@@ -99,7 +92,6 @@ class DeepTrainer:
             lr=float(lr),
         )
 
-        old_loss = torch.inf
         for epoch in range(n_epochs):
             loss = self.train_epoch(
                 train_dl=train_dataloader,
@@ -110,8 +102,9 @@ class DeepTrainer:
             if epoch % snapshot_interval == 0:
                 save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
 
-            if (abs(loss - old_loss) / old_loss < float(tol)) and early_stop:
-                save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
-                break
-
-            old_loss = loss
+            if early_stop:
+                if abs(loss) < float(tol):
+                    save_model(
+                        self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl"
+                    )
+                    break

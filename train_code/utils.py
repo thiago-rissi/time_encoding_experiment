@@ -5,10 +5,12 @@ from models.ts_classifier import TSClassifier
 from train_code.trainers import *
 from dataset.utils import *
 from dataset.datasets import *
+from sklearn.linear_model import RidgeClassifierCV
 
 
 def train(
     models_config: dict,
+    datasets_config: dict,
     deep_trainer: dict,
     general_trainer: dict,
     datasets: list[str],
@@ -27,6 +29,7 @@ def train(
             if config["deep"]:
                 dataset = DeepDataset(
                     dataset_path=dataset_path / f"{dataset_name}_train.ts",
+                    nan_strategy=datasets_config["nan_strategy"][dataset],
                     device=device,
                 )
                 model_class = getattr(sys.modules[__name__], model_name)
@@ -42,8 +45,19 @@ def train(
                     dataset=dataset, device=device, save_path=save_path, **deep_trainer
                 )
             else:
-                dataset = GeneralDataset(dataset_path=dataset_path, task="train")
+                dataset = GeneralDataset(
+                    dataset_path=dataset_path,
+                    rocket=config["rocket"],
+                    task="train",
+                    feature_first=config["feature_first"],
+                    dataset_name=dataset_name,
+                )
                 model_class = getattr(sys.modules[__name__], model_name)
-                model = model_class(**config)
-                trainer = GeneralTrainer(model=model, **general_trainer)
-                trainer.train(dataset=dataset, **general_trainer)
+                model = model_class(**config["params"])
+                model = model.fit(dataset.X, dataset.y)
+                save_path = pathlib.Path(general_trainer["base_path"]) / (
+                    model_name + ".pkl"
+                )
+
+                with open(save_path, "wb") as f:
+                    pickle.dump(model, f)

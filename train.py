@@ -44,7 +44,10 @@ def main(args: list[str]):
     with open(pathlib.Path("models/metadata.yml"), "r") as f:
         models_config = yaml.safe_load(f)
 
-    train(models_config=models_config, **config)
+    with open(pathlib.Path("conf/pre_process.yml"), "r") as f:
+        datasets_config = yaml.safe_load(f)
+
+    train(models_config=models_config, datasets_config=datasets_config, **config)
 
 
 if __name__ == "__main__":

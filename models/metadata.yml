@@ -12,3 +12,4 @@ TSClassifier:
       dropout: 0.0
   decoder:
     hidden_size: 100
+

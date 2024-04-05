@@ -3,17 +3,37 @@ import numpy.typing as npt
 from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
 from dataset.utils import *
 import pathlib
+import numpy as np
 
 
 class GeneralDataset:
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        dataset_path: pathlib.Path,
+        rocket: bool,
+        task: str,
+        feature_first: bool,
+        dataset_name: str,
+    ) -> None:
+        if rocket:
+            X = np.load(dataset_path / f"X_{task}.npy")
+            y = np.load(dataset_path / f"y_{task}.npy")
+            if feature_first:
+                X = X.swapaxes(1, 2)
+        else:
+            X, y = load_from_tsfile(dataset_path / (dataset_name + f"{task}.ts"))
+            if not feature_first:
+                X = X.swapaxes(1, 2)
+
+        self.X = X
+        self.y = y
 
 
 class DeepDataset:
     def __init__(
         self,
         dataset_path: pathlib.Path,
+        nan_strategy: str,
         device: torch.device,
         normalize: bool = False,
         statistics: dict | None = None,
@@ -36,9 +56,10 @@ class DeepDataset:
             X = normalize(X, self.statistics)
 
         self.X = X
-        self.y = encode_y(y, self.encoding_order, device)
+        self.y = encode_y_deep(y, self.encoding_order, device)
         self.timestamps = torch.arange(self.t_length, device=device)
         self.num_classes = len(self.encoding_order)
+        self.nan_strategy = nan_strategy
 
     def __len__(self) -> int:
         return self.n_instances

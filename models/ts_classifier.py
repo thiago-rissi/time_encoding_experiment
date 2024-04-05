@@ -6,7 +6,7 @@ from models.time_encoder import *
 from torch.nn import GRU, TransformerEncoder
 
 
-class RNN:
+class RNN(nn.Module):
     def __init__(
         self,
         input_size: int,
@@ -15,6 +15,7 @@ class RNN:
         batch_first: bool,
         **kwargs,
     ) -> None:
+        super().__init__()
         self.encoder = GRU(
             input_size=input_size,
             hidden_size=hidden_size,
@@ -88,7 +89,7 @@ class LinearDecoder(nn.Module):
 
         self.internal_linear = nn.Linear(hidden_size, hidden_size)
         self.relu = nn.ReLU()
-        self.projective_linear = nn.Linear(hidden_size, 1)
+        self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
@@ -96,7 +97,7 @@ class LinearDecoder(nn.Module):
         x_internal = self.relu(x_internal)
         y_hat = self.projective_linear(x_internal)
 
-        return y_hat.squeeze()
+        return y_hat
 
 
 class TSClassifier(nn.Module):

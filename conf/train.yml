@@ -7,9 +7,10 @@ deep_trainer:
   n_epochs: 200
   batch_size: 20
   early_stop: true
-  tol: 1e-3
+  tol: 1e-4
   lr: 1e-3
   snapshot_interval: 10
   base_path: data/models
 
 general_trainer:
+  base_path: data/models
