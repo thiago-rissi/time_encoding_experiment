@@ -8,6 +8,56 @@ from dataset.datasets import *
 from sklearn.linear_model import RidgeClassifierCV
 
 
+def deep_train_step(
+    dataset_path: pathlib.Path,
+    dataset_name: str,
+    model_name: str,
+    datasets_config: dict,
+    config: dict,
+    deep_trainer: dict,
+    device: torch.device,
+) -> None:
+    dataset = DeepDataset(
+        dataset_path=dataset_path / f"{dataset_name}_train.ts",
+        dataset_name=dataset_name,
+        nan_strategy=datasets_config["nan_strategy"][dataset_name],
+        device=device,
+    )
+    model_class = getattr(sys.modules[__name__], model_name)
+    model = model_class(num_classes=dataset.num_classes, **config)
+
+    trainer = DeepTrainer(model=model, **deep_trainer)
+    save_path = (pathlib.Path(deep_trainer["base_path"]) / model_name) / dataset_name
+
+    save_path.mkdir(parents=True, exist_ok=True)
+    trainer.train(dataset=dataset, device=device, save_path=save_path, **deep_trainer)
+
+
+def general_train_step(
+    dataset_path: pathlib.Path,
+    dataset_name: str,
+    model_name: str,
+    config: dict,
+    general_trainer: dict,
+) -> None:
+    dataset = GeneralDataset(
+        dataset_path=dataset_path,
+        rocket=config["rocket"],
+        task="train",
+        feature_first=config["feature_first"],
+        dataset_name=dataset_name,
+    )
+    model_class = getattr(sys.modules[__name__], model_name)
+    model = model_class(**config["params"])
+    model = model.fit(dataset.X, dataset.y)
+    save_path = pathlib.Path(general_trainer["base_path"]) / (
+        f"{model_name}_{dataset_name}.pkl"
+    )
+
+    with open(save_path, "wb") as f:
+        pickle.dump(model, f)
+
+
 def train(
     models_config: dict,
     datasets_config: dict,
@@ -27,38 +77,20 @@ def train(
             dataset_path = (base_path / dataset_name) / "0_missing"
 
             if config["deep"]:
-                dataset = DeepDataset(
-                    dataset_path=dataset_path / f"{dataset_name}_train.ts",
-                    dataset_name=dataset_name,
-                    nan_strategy=datasets_config["nan_strategy"][dataset_name],
-                    device=device,
-                )
-                model_class = getattr(sys.modules[__name__], model_name)
-                model = model_class(num_classes=dataset.num_classes, **config)
-
-                trainer = DeepTrainer(model=model, **deep_trainer)
-                save_path = (
-                    pathlib.Path(deep_trainer["base_path"]) / model_name
-                ) / dataset_name
-
-                save_path.mkdir(parents=True, exist_ok=True)
-                trainer.train(
-                    dataset=dataset, device=device, save_path=save_path, **deep_trainer
+                deep_train_step(
+                    dataset_path,
+                    dataset_name,
+                    model_name,
+                    datasets_config,
+                    config,
+                    deep_trainer,
+                    device,
                 )
             else:
-                dataset = GeneralDataset(
-                    dataset_path=dataset_path,
-                    rocket=config["rocket"],
-                    task="train",
-                    feature_first=config["feature_first"],
-                    dataset_name=dataset_name,
+                general_train_step(
+                    dataset_path,
+                    dataset_name,
+                    model_name,
+                    config,
+                    general_trainer,
                 )
-                model_class = getattr(sys.modules[__name__], model_name)
-                model = model_class(**config["params"])
-                model = model.fit(dataset.X, dataset.y)
-                save_path = pathlib.Path(general_trainer["base_path"]) / (
-                    f"{model_name}_{dataset_name}.pkl"
-                )
-
-                with open(save_path, "wb") as f:
-                    pickle.dump(model, f)
