@@ -38,7 +38,7 @@ def base_data(
     write_to_tsfile(
         X=X_test,
         y=y_test,
-        problem_name=f"{dataset}_test.ts",
+        problem_name=f"{dataset}_0.ts",
         path=out_path,
     )
     apply_rocket(
@@ -82,7 +82,7 @@ def pre_process_step(
         nan_strategy=nan_strategy,
     )
     write_to_tsfile(
-        X=X_nan,
+        X=X_nan.swapaxes(1, 2),
         y=y_test,
         problem_name=f"{dataset}_{int(100*pmiss)}_nan.ts",
         path=pmiss_path,
@@ -90,7 +90,7 @@ def pre_process_step(
     print("----> Imputing data points")
     X_imp = impute(X_nan=X_nan, n_instances=n_instances, imputer=imputer)
     write_to_tsfile(
-        X=X_imp,
+        X=X_imp.swapaxes(1, 2),
         y=y_test,
         problem_name=f"{dataset}_{int(100*pmiss)}.ts",
         path=pmiss_path,

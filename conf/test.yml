@@ -1,0 +1,18 @@
+datasets:
+  - AsphaltPavementTypeCoordinates
+models:
+  - TSClassifier
+pmisses:
+  - 0.0
+  - 0.2
+  - 0.4
+  - 0.6
+  - 0.7
+  - 0.8
+  - 0.9
+deep_tester:
+  loss: CrossEntropyLoss
+  batch_size: 20
+  base_path: data/outputs
+general_tester:
+  base_path: data/outputs

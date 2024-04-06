@@ -29,7 +29,8 @@ def train(
             if config["deep"]:
                 dataset = DeepDataset(
                     dataset_path=dataset_path / f"{dataset_name}_train.ts",
-                    nan_strategy=datasets_config["nan_strategy"][dataset],
+                    dataset_name=dataset_name,
+                    nan_strategy=datasets_config["nan_strategy"][dataset_name],
                     device=device,
                 )
                 model_class = getattr(sys.modules[__name__], model_name)
@@ -56,7 +57,7 @@ def train(
                 model = model_class(**config["params"])
                 model = model.fit(dataset.X, dataset.y)
                 save_path = pathlib.Path(general_trainer["base_path"]) / (
-                    model_name + ".pkl"
+                    f"{model_name}_{dataset_name}.pkl"
                 )
 
                 with open(save_path, "wb") as f:

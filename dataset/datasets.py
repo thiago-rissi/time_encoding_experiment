@@ -14,6 +14,7 @@ class GeneralDataset:
         task: str,
         feature_first: bool,
         dataset_name: str,
+        pmiss: int = 0,
     ) -> None:
         if rocket:
             X = np.load(dataset_path / f"X_{task}.npy")
@@ -21,7 +22,12 @@ class GeneralDataset:
             if feature_first:
                 X = X.swapaxes(1, 2)
         else:
-            X, y = load_from_tsfile(dataset_path / (dataset_name + f"{task}.ts"))
+            ts_path = (
+                dataset_path / (dataset_name + "train.ts")
+                if task == "train"
+                else dataset_path / (dataset_name + f"_{pmiss}.ts")
+            )
+            X, y = load_from_tsfile(ts_path)
             if not feature_first:
                 X = X.swapaxes(1, 2)
 
@@ -33,6 +39,7 @@ class DeepDataset:
     def __init__(
         self,
         dataset_path: pathlib.Path,
+        dataset_name: str,
         nan_strategy: str,
         device: torch.device,
         normalize: bool = False,
@@ -40,7 +47,8 @@ class DeepDataset:
     ) -> None:
 
         self.statistics = statistics
-        X, y, metadata = load_from_tsfile(str(dataset_path), return_meta_data=True)
+        X, y = load_from_tsfile(str(dataset_path))
+        metadata = get_dataset_metadata(dataset_name)
 
         X = torch.tensor(X, device=device, dtype=torch.float32)
 

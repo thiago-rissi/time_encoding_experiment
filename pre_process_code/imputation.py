@@ -134,7 +134,8 @@ def create_nan_dataset(
 
         xs_nan.append(x_i_nan)
 
-    return np.stack(xs_nan)
+    X_nan = np.stack(xs_nan)
+    return X_nan
 
 
 def impute(
@@ -149,4 +150,5 @@ def impute(
         x_i_fitted = imputer.fit_transform(x_i_nan)
         xs.append(x_i_fitted)
 
-    return np.stack(xs)
+    X_imputed = np.stack(xs)
+    return X_imputed

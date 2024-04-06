@@ -1,5 +1,6 @@
 TSClassifier:
   deep: true
+  test_nan: true
   encoder:
     ts_encoding:
       encoder_class: RNN
