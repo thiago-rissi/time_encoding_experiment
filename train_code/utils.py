@@ -8,16 +8,16 @@ from dataset.datasets import *
 from sklearn.linear_model import RidgeClassifierCV
 
 
-def deep_train_step(
+def torch_train_step(
     dataset_path: pathlib.Path,
     dataset_name: str,
     model_name: str,
     datasets_config: dict,
     config: dict,
-    deep_trainer: dict,
+    torch_trainer: dict,
     device: torch.device,
 ) -> None:
-    dataset = DeepDataset(
+    dataset = TorchDataset(
         dataset_path=dataset_path / f"{dataset_name}_train.ts",
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],

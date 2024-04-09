@@ -154,5 +154,3 @@ def pre_process(
                 nan_strategy=nan_strategy[dataset],
                 imputer=imputer,
             )
-
-    pass

@@ -35,7 +35,7 @@ class GeneralDataset:
         self.y = y
 
 
-class DeepDataset:
+class TorchDataset:
     def __init__(
         self,
         dataset_path: pathlib.Path,

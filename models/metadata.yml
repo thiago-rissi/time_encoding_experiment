@@ -1,5 +1,5 @@
 TSClassifier:
-  deep: true
+  torch: true
   test_nan: true
   encoder:
     ts_encoding:

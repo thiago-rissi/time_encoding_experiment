@@ -15,7 +15,7 @@ def save_model(model, outputfile: pathlib.Path):
     torch.save(model.state_dict(), outputfile)
 
 
-class DeepTrainer:
+class TorchTrainer:
     def __init__(
         self,
         loss: str,
