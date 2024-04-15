@@ -29,7 +29,7 @@ class TSEncoder(nn.Module):
         self,
         time_encoding: dict,
         ts_encoding: dict,
-        num_classes: int,
+        num_features: int,
         **kwargs,
     ) -> None:
 
@@ -49,7 +49,7 @@ class TSEncoder(nn.Module):
         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
 
         self.encoder_wrapper = encoder_class(
-            input_size=num_classes + self.time_encoding_size, **ts_encoding
+            input_size=num_features + self.time_encoding_size, **ts_encoding
         )
 
     def encode_timestamps(
@@ -106,12 +106,13 @@ class TSClassifier(nn.Module):
         encoder: dict,
         decoder: dict,
         num_classes: int,
+        num_features: int,
         **kwargs,
     ) -> None:
 
         super().__init__()
 
-        self.encoder = TSEncoder(num_classes=num_classes, **encoder)
+        self.encoder = TSEncoder(num_features=num_features, **encoder)
         self.decoder = LinearDecoder(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):

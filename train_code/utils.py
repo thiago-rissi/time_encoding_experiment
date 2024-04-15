@@ -2,10 +2,14 @@ import pathlib
 import torch
 import sys
 from models.ts_classifier import TSClassifier
+from models.resnet import ResNet50
 from train_code.trainers import *
 from dataset.utils import *
 from dataset.datasets import *
-from sklearn.linear_model import RidgeClassifierCV
+from sklearn.linear_model import RidgeClassifier
+from sktime.classification.deep_learning.resnet import ResNetClassifier
+from sktime.classification.interval_based import CanonicalIntervalForest
+from sktime.classification.hybrid import HIVECOTEV2
 
 
 def torch_train_step(
@@ -24,13 +28,15 @@ def torch_train_step(
         device=device,
     )
     model_class = getattr(sys.modules[__name__], model_name)
-    model = model_class(num_classes=dataset.num_classes, **config)
+    model = model_class(
+        num_classes=dataset.num_classes, num_features=dataset.n_variables, **config
+    )
 
-    trainer = DeepTrainer(model=model, **deep_trainer)
-    save_path = (pathlib.Path(deep_trainer["base_path"]) / model_name) / dataset_name
+    trainer = TorchTrainer(model=model, **torch_trainer)
+    save_path = (pathlib.Path(torch_trainer["base_path"]) / model_name) / dataset_name
 
     save_path.mkdir(parents=True, exist_ok=True)
-    trainer.train(dataset=dataset, device=device, save_path=save_path, **deep_trainer)
+    trainer.train(dataset=dataset, device=device, save_path=save_path, **torch_trainer)
 
 
 def general_train_step(
@@ -61,7 +67,7 @@ def general_train_step(
 def train(
     models_config: dict,
     datasets_config: dict,
-    deep_trainer: dict,
+    torch_trainer: dict,
     general_trainer: dict,
     datasets: list[str],
     models: list[str],
@@ -76,14 +82,14 @@ def train(
             print(f"---> Dataset: {dataset_name}")
             dataset_path = (base_path / dataset_name) / "0_missing"
 
-            if config["deep"]:
-                deep_train_step(
+            if config["torch"]:
+                torch_train_step(
                     dataset_path,
                     dataset_name,
                     model_name,
                     datasets_config,
                     config,
-                    deep_trainer,
+                    torch_trainer,
                     device,
                 )
             else:

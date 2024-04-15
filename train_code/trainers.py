@@ -1,4 +1,4 @@
-from dataset.datasets import DeepDataset
+from dataset.datasets import TorchDataset
 from torch.utils.data import DataLoader
 from torch.optim import Adam, Optimizer
 from typing import Any
@@ -63,7 +63,7 @@ class TorchTrainer:
 
     def train(
         self,
-        dataset: DeepDataset,
+        dataset: TorchDataset,
         n_epochs: int,
         batch_size: int,
         early_stop: bool,

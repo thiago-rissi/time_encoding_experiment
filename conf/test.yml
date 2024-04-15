@@ -10,7 +10,7 @@ pmisses:
   - 0.7
   - 0.8
   - 0.9
-deep_tester:
+torch_tester:
   loss: CrossEntropyLoss
   batch_size: 20
   base_path: data/outputs

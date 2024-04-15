@@ -2,14 +2,18 @@ imputer_name: MissForest
 primary_path: data/primary
 feature_path: data/feature
 datasets:
-  - AsphaltPavementTypeCoordinates
+  - LSST
+  #- Heartbeat
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:
   AsphaltPavementTypeCoordinates: same
+  Heartbeat: same
+  LSST: same
+  UWaveGestureLibrary: same
 pmiss_list:
-  - 0.2
-  - 0.4
+  #- 0.2
+  #- 0.4
   - 0.6
   - 0.7
   - 0.8

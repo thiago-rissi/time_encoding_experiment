@@ -14,3 +14,35 @@ TSClassifier:
   decoder:
     hidden_size: 100
 
+RidgeClassifier:
+  rocket: true
+  torch: false
+  feature_first: false
+  params:
+    alpha: 1.0
+
+CanonicalIntervalForest:
+  rocket: false
+  torch: false
+  feature_first: true
+  params: 
+    n_jobs: -1
+
+ResNet50:
+  rocket: false
+  torch: true
+  feature_first: true
+  params:
+    loss: categorical_crossentropy
+    n_epochs: 500
+
+HIVECOTEV2:
+  rocket: false
+  torch: false
+  feature_first: true
+  params:
+    n_jobs: -1
+    time_limit_in_minutes: 60
+  
+
+

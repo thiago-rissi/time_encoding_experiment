@@ -1,10 +1,18 @@
 datasets:
   - AsphaltPavementTypeCoordinates
+  - Heartbeat
+  - UWaveGestureLibrary
 models:
-  - TSClassifier
-deep_trainer:
+  #- TSClassifier
+  # - RidgeClassifier
+  # - CanonicalIntervalForest
+  # - HIVECOTEV2
+  - ResNet50
+  
+
+torch_trainer:
   loss: CrossEntropyLoss
-  n_epochs: 200
+  n_epochs: 500
   batch_size: 20
   early_stop: true
   tol: 1e-4

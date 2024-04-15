@@ -23,11 +23,11 @@ class GeneralDataset:
                 X = X.swapaxes(1, 2)
         else:
             ts_path = (
-                dataset_path / (dataset_name + "train.ts")
+                dataset_path / (dataset_name + "_train.ts")
                 if task == "train"
                 else dataset_path / (dataset_name + f"_{pmiss}.ts")
             )
-            X, y = load_from_tsfile(ts_path)
+            X, y = load_from_tsfile(str(ts_path))
             if not feature_first:
                 X = X.swapaxes(1, 2)
 
