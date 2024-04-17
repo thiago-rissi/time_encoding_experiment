@@ -1,4 +1,4 @@
-from dataset.datasets import DeepDataset
+from dataset.datasets import TorchDataset
 from torch.utils.data import DataLoader
 from torch.optim import Adam, Optimizer
 from typing import Any
@@ -13,7 +13,7 @@ from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 import polars as pl
 
 
-class DeepTester:
+class TorchTester:
     def __init__(
         self,
         model: nn.Module,
@@ -36,7 +36,7 @@ class DeepTester:
 
     def test(
         self,
-        dataset: DeepDataset,
+        dataset: TorchDataset,
         batch_size: int,
         device: torch.device,
         save_path: str,

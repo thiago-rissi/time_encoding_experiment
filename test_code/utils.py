@@ -16,14 +16,14 @@ def load_model(
     return model
 
 
-def deep_test_step(
+def torch_test_step(
     pmiss_path: pathlib.Path,
     dataset_name: str,
     pmiss: float,
     model_name: str,
     config: dict,
     datasets_config: dict,
-    deep_tester: dict,
+    torch_tester: dict,
     device: torch.device,
 ) -> None:
     test_path = (
@@ -31,7 +31,7 @@ def deep_test_step(
         if config["test_nan"] and pmiss != 0.0
         else pmiss_path / f"{dataset_name}_{int(100*pmiss)}.ts"
     )
-    dataset = DeepDataset(
+    dataset = TorchDataset(
         dataset_path=test_path,
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
@@ -45,10 +45,10 @@ def deep_test_step(
         device=device,
     )
 
-    tester = DeepTester(model=model, model_name=model_name, **deep_tester)
+    tester = TorchTester(model=model, model_name=model_name, **torch_tester)
 
     save_path = os.path.join(
-        deep_tester["base_path"],
+        torch_tester["base_path"],
         f"{model_name}_{dataset_name}_{int(100*pmiss)}.parquet",
     )
 
@@ -56,7 +56,7 @@ def deep_test_step(
         dataset=dataset,
         device=device,
         save_path=save_path,
-        **deep_tester,
+        **torch_tester,
     )
 
 
@@ -99,7 +99,7 @@ def test(
     pmisses: list[float],
     models_config: dict,
     datasets_config: dict,
-    deep_tester: dict,
+    torch_tester: dict,
     general_tester: dict,
 ) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -116,15 +116,15 @@ def test(
                 print(f"---> Missing percentage: {int(100*pmiss)}")
                 pmiss_path = dataset_path / f"{int(100*pmiss)}_missing"
 
-                if config["deep"]:
-                    deep_test_step(
+                if config["torch"]:
+                    torch_test_step(
                         pmiss_path,
                         dataset_name,
                         pmiss,
                         model_name,
                         config,
                         datasets_config,
-                        deep_tester,
+                        torch_tester,
                         device,
                     )
                 else:
