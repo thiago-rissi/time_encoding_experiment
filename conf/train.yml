@@ -7,7 +7,7 @@ models:
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
-  - ResNet50
+  - ResNetClassifier
   
 
 torch_trainer:

@@ -28,13 +28,13 @@ CanonicalIntervalForest:
   params: 
     n_jobs: -1
 
-ResNet50:
+ResNetClassifier:
   rocket: false
-  torch: true
+  torch: false
   feature_first: true
   params:
     loss: categorical_crossentropy
-    n_epochs: 500
+    n_epochs: 200
 
 HIVECOTEV2:
   rocket: false

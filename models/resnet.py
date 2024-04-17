@@ -9,24 +9,24 @@ class Bottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, i_downsample=None, stride=1):
         super(Bottleneck, self).__init__()
 
-        self.conv1 = nn.Conv2d(
+        self.conv1 = nn.Conv1d(
             in_channels, out_channels, kernel_size=1, stride=1, padding=0
         )
-        self.batch_norm1 = nn.BatchNorm2d(out_channels)
+        self.batch_norm1 = nn.BatchNorm1d(out_channels)
 
-        self.conv2 = nn.Conv2d(
+        self.conv2 = nn.Conv1d(
             out_channels, out_channels, kernel_size=3, stride=stride, padding=1
         )
-        self.batch_norm2 = nn.BatchNorm2d(out_channels)
+        self.batch_norm2 = nn.BatchNorm1d(out_channels)
 
-        self.conv3 = nn.Conv2d(
+        self.conv3 = nn.Conv1d(
             out_channels,
             out_channels * self.expansion,
             kernel_size=1,
             stride=1,
             padding=0,
         )
-        self.batch_norm3 = nn.BatchNorm2d(out_channels * self.expansion)
+        self.batch_norm3 = nn.BatchNorm1d(out_channels * self.expansion)
 
         self.i_downsample = i_downsample
         self.stride = stride
@@ -57,7 +57,7 @@ class Block(nn.Module):
     def __init__(self, in_channels, out_channels, i_downsample=None, stride=1):
         super(Block, self).__init__()
 
-        self.conv1 = nn.Conv2d(
+        self.conv1 = nn.Conv1d(
             in_channels,
             out_channels,
             kernel_size=3,
@@ -65,8 +65,8 @@ class Block(nn.Module):
             stride=stride,
             bias=False,
         )
-        self.batch_norm1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(
+        self.batch_norm1 = nn.BatchNorm1d(out_channels)
+        self.conv2 = nn.Conv1d(
             out_channels,
             out_channels,
             kernel_size=3,
@@ -74,7 +74,7 @@ class Block(nn.Module):
             stride=stride,
             bias=False,
         )
-        self.batch_norm2 = nn.BatchNorm2d(out_channels)
+        self.batch_norm2 = nn.BatchNorm1d(out_channels)
 
         self.i_downsample = i_downsample
         self.stride = stride
@@ -100,12 +100,12 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.in_channels = num_features
 
-        self.conv1 = nn.Conv2d(
+        self.conv1 = nn.Conv1d(
             num_features, num_channels, kernel_size=7, stride=2, padding=3, bias=False
         )
-        self.batch_norm1 = nn.BatchNorm2d(64)
+        self.batch_norm1 = nn.BatchNorm1d(num_features)
         self.relu = nn.ReLU()
-        self.max_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.max_pool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
 
         self.layer1 = self._make_layer(ResBlock, layer_list[0], planes=64)
         self.layer2 = self._make_layer(ResBlock, layer_list[1], planes=128, stride=2)
@@ -113,7 +113,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(ResBlock, layer_list[3], planes=512, stride=2)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512 * ResBlock.expansion, num_classes)
+        self.fc = nn.Linear(1, num_classes)
 
     def forward(self, x, timestamps):
         x = self.relu(self.batch_norm1(self.conv1(x)))
@@ -136,13 +136,13 @@ class ResNet(nn.Module):
 
         if stride != 1 or self.in_channels != planes * ResBlock.expansion:
             ii_downsample = nn.Sequential(
-                nn.Conv2d(
+                nn.Conv1d(
                     self.in_channels,
                     planes * ResBlock.expansion,
                     kernel_size=1,
                     stride=stride,
                 ),
-                nn.BatchNorm2d(planes * ResBlock.expansion),
+                nn.BatchNorm1d(planes * ResBlock.expansion),
             )
 
         layers.append(
