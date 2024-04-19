@@ -34,3 +34,20 @@ def compare_imputation(
     axes[1].legend()
     axes[2].legend()
     plt.tight_layout()
+
+
+def plot_metric(
+    results: dict[str, list],
+    pmiss: list = [0, 20, 40, 60, 70, 80, 90],
+    title: str = "",
+    metric: str = "",
+) -> None:
+    fig, ax = plt.subplots()
+    for name, metric in results.items():
+        ax.plot(pmiss, metric, label=name)
+
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Time serie")
+    ax.set_title(title + metric)
+    ax.grid()
+    plt.show()

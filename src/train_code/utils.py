@@ -10,6 +10,7 @@ from sklearn.linear_model import RidgeClassifier
 from sktime.classification.deep_learning.resnet import ResNetClassifier
 from sktime.classification.interval_based import CanonicalIntervalForest
 from sktime.classification.hybrid import HIVECOTEV2
+import datetime
 
 
 def torch_train_step(
@@ -36,7 +37,11 @@ def torch_train_step(
     save_path = (pathlib.Path(torch_trainer["base_path"]) / model_name) / dataset_name
 
     save_path.mkdir(parents=True, exist_ok=True)
+    i_time = datetime.datetime.now()
     trainer.train(dataset=dataset, device=device, save_path=save_path, **torch_trainer)
+    f_time = datetime.datetime.now()
+
+    print(f"Training duration: {f_time - i_time}")
 
 
 def general_train_step(
@@ -55,7 +60,12 @@ def general_train_step(
     )
     model_class = getattr(sys.modules[__name__], model_name)
     model = model_class(**config["params"])
+
+    i_time = datetime.datetime.now()
     model = model.fit(dataset.X, dataset.y)
+    f_time = datetime.datetime.now()
+    print(f"Training duration: {f_time - i_time}")
+
     save_path = pathlib.Path(general_trainer["base_path"]) / (
         f"{model_name}_{dataset_name}.pkl"
     )

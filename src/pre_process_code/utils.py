@@ -2,6 +2,7 @@ from pre_process_code.imputation import *
 from pre_process_code.rocket import *
 import sys
 from sklearn.model_selection import train_test_split
+import datetime
 
 
 def open_and_split(
@@ -68,6 +69,7 @@ def pre_process_step(
     nan_strategy: str,
     imputer: Any,
 ) -> None:
+
     print(f"---> Missing percentage: {int(100*pmiss)}%")
     n_instances = X_test.shape[0]
     n_variables = X_test.shape[1]
@@ -87,14 +89,20 @@ def pre_process_step(
         problem_name=f"{dataset}_{int(100*pmiss)}_nan.ts",
         path=pmiss_path,
     )
+
     print("----> Imputing data points")
+    i_time = datetime.datetime.now()
     X_imp = impute(X_nan=X_nan, n_instances=n_instances, imputer=imputer)
+    f_time = datetime.datetime.now()
+    print(f"Imputation time: {f_time - i_time}")
+
     write_to_tsfile(
         X=X_imp.swapaxes(1, 2),
         y=y_test,
         problem_name=f"{dataset}_{int(100*pmiss)}.ts",
         path=pmiss_path,
     )
+
     apply_rocket(
         X=X_imp,
         y=y_test,
@@ -123,6 +131,7 @@ def pre_process(
 
     for dataset in datasets:
         print(f"Pre-processing dataset: {dataset}")
+        initial_time = datetime.datetime.now()
         dataset_path = primary_path / dataset
         dataset_path.mkdir(exist_ok=True)
         out_path = feature_path / dataset
@@ -154,3 +163,5 @@ def pre_process(
                 nan_strategy=nan_strategy[dataset],
                 imputer=imputer,
             )
+        final_time = datetime.datetime.now()
+        print(f"Total Execution time: {final_time - initial_time}")
