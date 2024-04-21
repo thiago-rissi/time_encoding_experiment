@@ -2,12 +2,14 @@ imputer_name: MissForest
 primary_path: data/primary
 feature_path: data/feature
 datasets:
+  - Heartbeat
+  - UWaveGestureLibrary
   - ArticularyWordRecognition
-  - Cricket
   - DuckDuckGeese
   - EthanolConcentration
   - Libras
   - NATOPS
+  - AsphaltPavementTypeCoordinates
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:
@@ -21,6 +23,8 @@ nan_strategy:
   EthanolConcentration: same
   Libras: same
   NATOPS: same
+  Ering: same
+  Epilepsy: same
 pmiss_list:
   - 0.2
   - 0.4
@@ -28,4 +32,4 @@ pmiss_list:
   - 0.7
   - 0.8
   - 0.9
-
+process_train: true

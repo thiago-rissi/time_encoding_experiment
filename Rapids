@@ -1,14 +1,12 @@
 Bootstrap: docker
-From: python:3.11
+From: continuumio/miniconda3
 
 %files
     # Copy your application's source code from host to container
     src /usr/src/code/src
     conf /usr/src/code/conf
-    requirements-rapidsai.txt /usr/src/code/requirements-rapidsai.txt
-    requirements.txt /usr/src/code/requirements.txt
-    requirements-torch.txt /usr/src/code/requirements-torch.txt
-    
+    environment.yml /usr/src/code/environment.yml
+
 %post
     # Install necessary packages
     apt-get update && apt-get install -y \
@@ -21,12 +19,9 @@ From: python:3.11
     # Install Python dependencies
     # Note: The 'requirements.txt' files need to be available in the container
     # You can add them using %files section or download them in this section
-
-    python -m pip install -r /usr/src/code/requirements.txt
-    python -m pip install -r /usr/src/code/requirements-torch.txt
+    conda env create -f /usr/src/code/environment.yml
+    conda run -n rapids /bin/bash
         
-        
-
 %runscript
     # The runscript is executed when you run the container without specifying a command
     exec tail -f /dev/null

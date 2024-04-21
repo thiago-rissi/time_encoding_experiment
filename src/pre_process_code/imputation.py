@@ -2,11 +2,12 @@ import numpy as np
 import numpy.typing as npt
 from tqdm import tqdm
 import random
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from typing import Any
 from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
+from xgboost import XGBRegressor
+import cupy as cp
 
 
 class MissForest:
@@ -17,7 +18,8 @@ class MissForest:
         strategy: str = "mean",
         fill_values: float | None = None,
     ) -> None:
-        self.regressor = RandomForestRegressor(n_jobs=-1, random_state=42)
+
+        self.regressor = XGBRegressor(random_state=42, device="cuda", n_jobs=-1)
         self.max_iter = max_iter
         self.tol = tol
         self.strategy = strategy
@@ -44,7 +46,7 @@ class MissForest:
         y = X_[known_ids, c]
         x = X_[known_ids][:, x_c]
 
-        regressor = self.regressor.fit(x, y)
+        regressor = self.regressor.fit(cp.array(x), cp.array(y))
 
         nan_length = sum(nan_ids)
         id = random.randint(0, lenght - nan_length)

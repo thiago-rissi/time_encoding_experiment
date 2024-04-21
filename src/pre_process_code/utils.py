@@ -122,6 +122,7 @@ def pre_process(
     train_ratio: float,
     nan_strategy: dict[str, str],
     max_iter: int,
+    process_train: bool,
     **kwargs,
 ) -> None:
 
@@ -141,16 +142,17 @@ def pre_process(
             dataset, dataset_path, train_ratio
         )
 
-        # Firstly, pre processes dataset without missing data
-        base_data(
-            X_train=X_train,
-            X_test=X_test,
-            y_train=y_train,
-            y_test=y_test,
-            dataset=dataset,
-            rocket_path=out_path,
-            out_path=out_path / "0_missing",
-        )
+        if process_train:
+            # Firstly, pre processes dataset without missing data
+            base_data(
+                X_train=X_train,
+                X_test=X_test,
+                y_train=y_train,
+                y_test=y_test,
+                dataset=dataset,
+                rocket_path=out_path,
+                out_path=out_path / "0_missing",
+            )
 
         imputer = imputer_class(max_iter=max_iter)
         for pmiss in pmiss_list:
