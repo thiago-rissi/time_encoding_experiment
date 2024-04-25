@@ -177,3 +177,5 @@ src/api/*/*.pt
 .svg
 *.sif
 *.txt
+*.out
+*.err

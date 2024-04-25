@@ -1,7 +1,20 @@
 datasets:
+  - ERing
+  - Epilepsy
+  - Heartbeat
+  - UWaveGestureLibrary
+  - ArticularyWordRecognition
+  - EthanolConcentration
+  - Libras
   - AsphaltPavementTypeCoordinates
+  - FingerMovements
+  - Handwriting
 models:
   - TSClassifier
+  - RidgeClassifier
+  - CanonicalIntervalForest
+  - HIVECOTEV2
+  - ResNetClassifier
 pmisses:
   - 0.0
   - 0.2

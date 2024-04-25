@@ -59,7 +59,7 @@ class TorchTester:
             with torch.no_grad():
                 y_hat, loss = self.predict(X, y, timestamps)
                 y_hat = np.argmax(y_hat.cpu(), axis=1)
-                y = np.argmax(y.cpu(), axis=1)  # Easier way to get y_label
+                y = y.cpu()
                 ys.append(y)
                 ys_hat.append(y_hat)
 

@@ -38,16 +38,17 @@ def compare_imputation(
 
 def plot_metric(
     results: dict[str, list],
+    metric: str,
     pmiss: list = [0, 20, 40, 60, 70, 80, 90],
     title: str = "",
-    metric: str = "",
 ) -> None:
     fig, ax = plt.subplots()
-    for name, metric in results.items():
-        ax.plot(pmiss, metric, label=name)
+    for name, result in results.items():
+        ax.plot(pmiss, result, label=name)
 
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Time serie")
-    ax.set_title(title + metric)
+    ax.set_xlabel("Missing percentage")
+    ax.set_ylabel(metric)
+    ax.set_title(title)
     ax.grid()
+    ax.legend()
     plt.show()

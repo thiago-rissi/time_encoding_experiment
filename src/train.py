@@ -41,7 +41,7 @@ def main(args: list[str]):
     with open(pathlib.Path(args_.config), "r") as f:
         config = yaml.safe_load(f)
 
-    with open(pathlib.Path("models/metadata.yml"), "r") as f:
+    with open(pathlib.Path("src/models/metadata.yml"), "r") as f:
         models_config = yaml.safe_load(f)
 
     with open(pathlib.Path("conf/pre_process.yml"), "r") as f:

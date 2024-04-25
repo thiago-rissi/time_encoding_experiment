@@ -31,13 +31,14 @@ def encode_y_deep(
     y_encoded = []
     for y_i in y:
         id = encoding_order.index(y_i)
-        y_ = torch.tensor(
-            [1 if i == id else 0 for i in range(len(encoding_order))],
-            device=device,
-            dtype=torch.float32,
-        )
+        # y_ = torch.tensor(
+        #     [1 if i == id else 0 for i in range(len(encoding_order))],
+        #     device=device,
+        #     dtype=torch.float32,
+        # )
+        y_ = id
         y_encoded.append(y_)
-    return torch.stack(y_encoded)
+    return torch.tensor(y_encoded, device=device)
 
 
 def encode_y(

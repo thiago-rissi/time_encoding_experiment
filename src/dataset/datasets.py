@@ -64,7 +64,8 @@ class TorchDataset:
             X = normalize(X, self.statistics)
 
         self.X = X
-        self.y = encode_y_deep(y, self.encoding_order, device)
+        self.y = encode_y_deep(y, self.encoding_order, device).long()
+        # self.y = torch.tensor(y.astype(np.float64), device=device).long()
         self.timestamps = torch.arange(self.t_length, device=device)
         self.num_classes = len(self.encoding_order)
         self.nan_strategy = nan_strategy

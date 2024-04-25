@@ -6,6 +6,7 @@ from dataset.datasets import *
 from test_code.testers import *
 import os
 from models.ts_classifier import TSClassifier
+from sktime.classification.deep_learning import ResNetClassifier
 
 
 def load_model(
@@ -38,7 +39,9 @@ def torch_test_step(
         device=device,
     )
     model_class = getattr(sys.modules[__name__], model_name)
-    model = model_class(num_classes=dataset.num_classes, **config)
+    model = model_class(
+        num_classes=dataset.num_classes, num_features=dataset.n_variables, **config
+    )
     model = load_model(
         model_basepath=os.path.join("data/models", model_name, dataset_name),
         model=model,
@@ -77,13 +80,18 @@ def general_step_tester(
         pmiss=int(100 * pmiss),
     )
 
+    if model_name == "ResNetClassifier":
+        model = ResNetClassifier()
+        model = model.load_from_path(
+            pathlib.Path("data/models") / f"{model_name}_{dataset_name}.zip"
+        )
     with open(
         pathlib.Path("data/models") / f"{model_name}_{dataset_name}.pkl",
         "rb",
     ) as f:
         model = pickle.load(f)
 
-    y_hat = model.predict(dataset.X)
+    y_hat = model.predict(np.nan_to_num(dataset.X))
     print(accuracy_score(dataset.y, y_hat))
     results = pl.DataFrame({"y": dataset.y, "y_hat": y_hat})
     save_path = os.path.join(

@@ -1,19 +1,25 @@
 datasets:
-  - AsphaltPavementTypeCoordinates
+  - ERing
+  - Epilepsy
   - Heartbeat
   - UWaveGestureLibrary
+  - ArticularyWordRecognition
+  - EthanolConcentration
+  - Libras
+  - AsphaltPavementTypeCoordinates
+  - FingerMovements
+  - Handwriting
 models:
-  #- TSClassifier
+  - TSClassifier
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
-  - ResNetClassifier
+  # - ResNetClassifier
   
-
 torch_trainer:
   loss: CrossEntropyLoss
   n_epochs: 500
-  batch_size: 20
+  batch_size: 8
   early_stop: true
   tol: 1e-4
   lr: 1e-3

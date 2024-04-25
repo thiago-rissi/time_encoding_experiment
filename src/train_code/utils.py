@@ -66,12 +66,17 @@ def general_train_step(
     f_time = datetime.datetime.now()
     print(f"Training duration: {f_time - i_time}")
 
-    save_path = pathlib.Path(general_trainer["base_path"]) / (
-        f"{model_name}_{dataset_name}.pkl"
-    )
-
-    with open(save_path, "wb") as f:
-        pickle.dump(model, f)
+    if model_name == "ResNetClassifier":
+        save_path = pathlib.Path(general_trainer["base_path"]) / (
+            f"{model_name}_{dataset_name}"
+        )
+        model.save(save_path)
+    else:
+        save_path = pathlib.Path(general_trainer["base_path"]) / (
+            f"{model_name}_{dataset_name}.pkl"
+        )
+        with open(save_path, "wb") as f:
+            pickle.dump(model, f)
 
 
 def train(
