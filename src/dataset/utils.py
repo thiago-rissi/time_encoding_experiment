@@ -25,17 +25,12 @@ def calculate_stats(ts: torch.Tensor) -> list[tuple[float, float]]:
     return stats
 
 
-def encode_y_deep(
+def encode_y(
     y: torch.Tensor, encoding_order: list, device: torch.device
 ) -> torch.Tensor:
     y_encoded = []
     for y_i in y:
         id = encoding_order.index(y_i)
-        # y_ = torch.tensor(
-        #     [1 if i == id else 0 for i in range(len(encoding_order))],
-        #     device=device,
-        #     dtype=torch.float32,
-        # )
         y_ = id
         y_encoded.append(y_)
     return torch.tensor(y_encoded, device=device)

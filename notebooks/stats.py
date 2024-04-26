@@ -38,7 +38,7 @@ def calculate_metrics(
         model_mean[model] = np.mean(metric_array, axis=0)
 
     pmiss_result = {}
-    for i in range(1, len(pmisses)):
+    for i in range(len(pmisses)):
         models_pmiss = {model: [] for model in models}
         for model in models:
             for dataset in datasets:
