@@ -3,7 +3,7 @@ import polars as pl
 import torch.nn as nn
 import sys
 from models.time_encoder import *
-from torch.nn import GRU, TransformerEncoder
+from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
 
 
 class RNN(nn.Module):
@@ -23,6 +23,59 @@ class RNN(nn.Module):
             batch_first=batch_first,
         )
 
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        X_encoded, _ = self.encoder(X)
+
+        return X_encoded[:, -1, :]
+
+
+class Transformer(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        batch_first: bool,
+        t_length: int,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+        encoder_layer = TransformerEncoderLayer(
+            batch_first=batch_first,
+            d_model=input_size,
+            nhead=1,
+        )
+        self.encoder = TransformerEncoder(
+            encoder_layer=encoder_layer,
+            num_layers=num_layers,
+        )
+
+        self.linear = nn.Linear(
+            in_features=input_size * t_length, out_features=hidden_size
+        )
+
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        X_encoded = self.encoder(X)
+        X_flat = torch.flatten(X_encoded, start_dim=1)
+        X_linear = self.linear(X_flat)
+        return X_linear
+
+
+class CNN(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.conv_block = nn.Sequential(
+            nn.Conv1d(in_channels=1, out_channels=2, kernel_size=4, padding=2),
+            nn.Conv1d(in_channels=2, out_channels=4, kernel_size=4, padding=2),
+            nn.MaxPool1d(kernel_size=2),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = torch.unsqueeze(x, dim=1)
+        x_conv = self.conv_block(x)
+        x_conv = x_conv.swapaxes(1, 2)
+        return x_conv
+
 
 class TSEncoder(nn.Module):
     def __init__(
@@ -30,6 +83,7 @@ class TSEncoder(nn.Module):
         time_encoding: dict,
         ts_encoding: dict,
         num_features: int,
+        t_length: int,
         **kwargs,
     ) -> None:
 
@@ -49,7 +103,9 @@ class TSEncoder(nn.Module):
         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
 
         self.encoder_wrapper = encoder_class(
-            input_size=num_features + self.time_encoding_size, **ts_encoding
+            input_size=num_features + self.time_encoding_size,
+            t_length=t_length,
+            **ts_encoding,
         )
 
     def encode_timestamps(
@@ -78,12 +134,12 @@ class TSEncoder(nn.Module):
         if self.time_encoding_size > 0:
             X, encoded_timestamps = self.encode_timestamps(X, timestamps)
 
-        X_encoded, _ = self.encoder_wrapper.encoder(X)
+        X_encoded = self.encoder_wrapper(X)
 
-        return X_encoded[:, -1, :]
+        return X_encoded
 
 
-class LinearDecoder(nn.Module):
+class TSDecoder(nn.Module):
     def __init__(self, num_classes, hidden_size: int, **kwargs) -> None:
         super().__init__()
 
@@ -107,13 +163,16 @@ class TSClassifier(nn.Module):
         decoder: dict,
         num_classes: int,
         num_features: int,
+        t_length: int,
         **kwargs,
     ) -> None:
 
         super().__init__()
 
-        self.encoder = TSEncoder(num_features=num_features, **encoder)
-        self.decoder = LinearDecoder(num_classes=num_classes, **decoder)
+        self.encoder = TSEncoder(
+            num_features=num_features, t_length=t_length, **encoder
+        )
+        self.decoder = TSDecoder(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
         x_encoded = self.encoder(X, timestamps)

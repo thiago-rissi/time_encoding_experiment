@@ -42,22 +42,6 @@ def base_data(
         problem_name=f"{dataset}_0.ts",
         path=out_path,
     )
-    apply_rocket(
-        X=X_train,
-        y=y_train,
-        base_path=rocket_path,
-        output_path=out_path,
-        X_label="X_train.npy",
-        y_label="y_train.npy",
-    )
-    apply_rocket(
-        X=X_test,
-        y=y_test,
-        base_path=rocket_path,
-        output_path=out_path,
-        X_label="X_test.npy",
-        y_label="y_test.npy",
-    )
 
 
 def pre_process_step(
@@ -101,15 +85,6 @@ def pre_process_step(
         y=y_test,
         problem_name=f"{dataset}_{int(100*pmiss)}.ts",
         path=pmiss_path,
-    )
-
-    apply_rocket(
-        X=X_imp,
-        y=y_test,
-        base_path=out_path,
-        output_path=pmiss_path,
-        X_label="X_test.npy",
-        y_label="y_test.npy",
     )
 
 

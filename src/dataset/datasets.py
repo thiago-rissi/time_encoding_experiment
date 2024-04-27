@@ -4,6 +4,9 @@ from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
 from dataset.utils import *
 import pathlib
 import numpy as np
+import pickle
+from models.time_encoder import PositionalEncoding
+from pre_process_code.rocket import apply_rocket
 
 
 class GeneralDataset:
@@ -14,28 +17,35 @@ class GeneralDataset:
         task: str,
         feature_first: bool,
         dataset_name: str,
+        add_encoding: bool,
+        time_encoding_size: int,
+        dropout: float,
         pmiss: int = 0,
     ) -> None:
-        if rocket:
-            X = np.load(dataset_path / f"X_{task}.npy")
-            y = np.load(dataset_path / f"y_{task}.npy")
-            if feature_first:
-                X = X.swapaxes(1, 2)
-        else:
-            ts_path = (
-                dataset_path / (dataset_name + "_train.ts")
-                if task == "train"
-                else dataset_path / (dataset_name + f"_{pmiss}.ts")
+        ts_path = (
+            dataset_path / (dataset_name + "_train.ts")
+            if task == "train"
+            else dataset_path / (dataset_name + f"_{pmiss}.ts")
+        )
+        X, y = load_from_tsfile(str(ts_path))
+        self.timestamps = np.ones(shape=(X.shape[0], X.shape[-1])) * np.arange(
+            X.shape[-1]
+        )
+
+        if add_encoding:
+            time_encoder = PositionalEncoding(
+                time_encoding_size=time_encoding_size, dropout=dropout
             )
-            X, y = load_from_tsfile(str(ts_path))
-            if not feature_first:
-                X = X.swapaxes(1, 2)
+            X = aggregate_time_encoding(time_encoder, X, self.timestamps)
+
+        if rocket:
+            base_path = dataset_path.parent
+            X = apply_rocket(X, base_path)
 
         self.X = X
-        self.y = y
-        # metadata = get_dataset_metadata(dataset_name)
-        # self.encoding_order = metadata["class_values"]
-        # self.y = encode_y(y, self.encoding_order, device=torch.device("cpu")).numpy()
+        metadata = get_dataset_metadata(dataset_name)
+        self.encoding_order = metadata["class_values"]
+        self.y = encode_y(y, self.encoding_order, device=torch.device("cpu")).numpy()
 
 
 class TorchDataset:

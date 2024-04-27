@@ -30,7 +30,10 @@ def torch_train_step(
     )
     model_class = getattr(sys.modules[__name__], model_name)
     model = model_class(
-        num_classes=dataset.num_classes, num_features=dataset.n_variables, **config
+        num_classes=dataset.num_classes,
+        num_features=dataset.n_variables,
+        t_length=dataset.t_length,
+        **config,
     )
 
     trainer = TorchTrainer(model=model, **torch_trainer)
@@ -57,7 +60,11 @@ def general_train_step(
         task="train",
         feature_first=config["feature_first"],
         dataset_name=dataset_name,
+        add_encoding=general_trainer["add_encoding"],
+        time_encoding_size=general_trainer["time_encoding_size"],
+        dropout=general_trainer["dropout"],
     )
+
     model_class = getattr(sys.modules[__name__], model_name)
     model = model_class(**config["params"])
 
@@ -66,15 +73,17 @@ def general_train_step(
     f_time = datetime.datetime.now()
     print(f"Training duration: {f_time - i_time}")
 
+    base_path = general_trainer["base_path"]
+    if general_trainer["add_encoding"]:
+        base_path = pathlib.Path(base_path)
+        base_path = base_path / ("time_encoding")
+        base_path.mkdir(exist_ok=True)
+
     if model_name == "ResNetClassifier":
-        save_path = pathlib.Path(general_trainer["base_path"]) / (
-            f"{model_name}_{dataset_name}"
-        )
+        save_path = pathlib.Path(base_path) / (f"{model_name}_{dataset_name}")
         model.save(save_path)
     else:
-        save_path = pathlib.Path(general_trainer["base_path"]) / (
-            f"{model_name}_{dataset_name}.pkl"
-        )
+        save_path = pathlib.Path(base_path) / (f"{model_name}_{dataset_name}.pkl")
         with open(save_path, "wb") as f:
             pickle.dump(model, f)
 

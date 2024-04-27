@@ -40,7 +40,10 @@ def torch_test_step(
     )
     model_class = getattr(sys.modules[__name__], model_name)
     model = model_class(
-        num_classes=dataset.num_classes, num_features=dataset.n_variables, **config
+        num_classes=dataset.num_classes,
+        num_features=dataset.n_variables,
+        t_length=dataset.t_length,
+        **config,
     )
     model = load_model(
         model_basepath=os.path.join("data/models", model_name, dataset_name),
@@ -78,27 +81,34 @@ def general_step_tester(
         feature_first=config["feature_first"],
         dataset_name=dataset_name,
         pmiss=int(100 * pmiss),
+        add_encoding=general_tester["add_encoding"],
+        time_encoding_size=general_tester["time_encoding_size"],
+        dropout=general_tester["dropout"],
     )
+
+    model_path = pathlib.Path("data/models")
+    save_path = pathlib.Path(general_tester["base_path"])
+    if general_tester["add_encoding"]:
+        model_path = model_path / "time_encoding"
+        save_path = save_path / "time_encoding"
+        save_path.mkdir(exist_ok=True)
 
     if model_name == "ResNetClassifier":
         model = ResNetClassifier()
-        model = model.load_from_path(
-            pathlib.Path("data/models") / f"{model_name}_{dataset_name}.zip"
-        )
-    with open(
-        pathlib.Path("data/models") / f"{model_name}_{dataset_name}.pkl",
-        "rb",
-    ) as f:
-        model = pickle.load(f)
+        model = model.load_from_path(model_path / f"{model_name}_{dataset_name}.zip")
+    else:
+        with open(
+            model_path / f"{model_name}_{dataset_name}.pkl",
+            "rb",
+        ) as f:
+            model = pickle.load(f)
 
     y_hat = model.predict(np.nan_to_num(dataset.X))
     print(accuracy_score(dataset.y, y_hat))
     results = pl.DataFrame({"y": dataset.y, "y_hat": y_hat})
-    save_path = os.path.join(
-        general_tester["base_path"],
-        f"{model_name}_{dataset_name}_{int(100*pmiss)}.parquet",
-    )
-    results.write_parquet(pathlib.Path(save_path))
+    save_path = save_path / f"{model_name}_{dataset_name}_{int(100*pmiss)}.parquet"
+
+    results.write_parquet(save_path)
 
 
 def test(

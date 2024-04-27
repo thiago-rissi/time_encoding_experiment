@@ -10,11 +10,11 @@ datasets:
   - FingerMovements
   - Handwriting
 models:
-  - TSClassifier
+  # - TSClassifier
   - RidgeClassifier
-  - CanonicalIntervalForest
-  - HIVECOTEV2
-  - ResNetClassifier
+  # - CanonicalIntervalForest
+  # - HIVECOTEV2
+  # - ResNetClassifier
 pmisses:
   - 0.0
   - 0.2
@@ -29,3 +29,6 @@ torch_tester:
   base_path: data/outputs
 general_tester:
   base_path: data/outputs
+  add_encoding: true
+  time_encoding_size: 50
+  dropout: 0.0

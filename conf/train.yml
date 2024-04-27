@@ -10,8 +10,8 @@ datasets:
   - FingerMovements
   - Handwriting
 models:
-  - TSClassifier
-  # - RidgeClassifier
+  # - TSClassifier
+  - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
@@ -28,3 +28,6 @@ torch_trainer:
 
 general_trainer:
   base_path: data/models
+  add_encoding: true
+  time_encoding_size: 50
+  dropout: 0.0
