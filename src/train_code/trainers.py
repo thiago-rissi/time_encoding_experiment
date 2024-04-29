@@ -145,13 +145,13 @@ class TorchARTrainer:
     def step(
         self,
         X: torch.Tensor,
-        y: torch.Tensor,
+        mask: torch.Tensor,
         timestamps: torch.Tensor,
         optimizer: Optimizer,
     ):
         optimizer.zero_grad()
-        y_hat = self.model(X, timestamps)
-        loss = self.loss_func(y_hat, y)
+        y_hat, _ = self.model(X, timestamps, mask=mask)
+        loss = self.loss_func(y_hat, X.swapaxes(1, 2)[:, 1:])
         loss.backward()
         optimizer.step()
 
@@ -165,13 +165,13 @@ class TorchARTrainer:
     ):
         losses = []
         self.model.train()
-        for i, (X, y, timestamps) in enumerate((pbar := tqdm(train_dl))):
+        for i, (X, timestamps, mask) in enumerate((pbar := tqdm(train_dl))):
             X.to(device)
-            y.to(device)
+            mask.to(device)
             loss = self.step(
                 X=X,
-                y=y,
                 timestamps=timestamps,
+                mask=mask,
                 optimizer=optimizer,
             )
             losses.append(loss.item())
@@ -216,12 +216,9 @@ class TorchARTrainer:
                 device=device_,
             )
 
-            if epoch % snapshot_interval == 0:
-                save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
+            # if epoch % snapshot_interval == 0:
+            #     save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
 
             if early_stop:
                 if abs(loss) < float(tol):
-                    save_model(
-                        self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl"
-                    )
                     break

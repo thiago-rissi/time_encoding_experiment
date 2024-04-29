@@ -1,18 +1,23 @@
 import pathlib
 import torch
 import sys
+
+import uniplot
 from dataset.utils import *
 from dataset.datasets import *
 from test_code.testers import *
 import os
-from models.ts_classifier import TSClassifier
+from models.ts_classifier import TSAREncoderDecoder, TSClassifier
 from sktime.classification.deep_learning import ResNetClassifier
 
 
 def load_model(
     model_basepath: str, model: nn.Module, device: torch.device
 ) -> nn.Module:
-    model_path = list(pathlib.Path(model_basepath).rglob("*.pkl"))[-1]
+    model_path = sorted(
+        list(pathlib.Path(model_basepath).rglob("*.pkl")),
+        key=lambda x: int(x.stem.split("_")[-1]),
+    )[-1]
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
@@ -26,7 +31,7 @@ def torch_test_step(
     datasets_config: dict,
     torch_tester: dict,
     device: torch.device,
-) -> None:
+) -> float:
     test_path = (
         pmiss_path / f"{dataset_name}_{int(100*pmiss)}_nan.ts"
         if config["test_nan"] and pmiss != 0.0
@@ -38,13 +43,17 @@ def torch_test_step(
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
     )
-    model_class = getattr(sys.modules[__name__], model_name)
-    model = model_class(
+
+    ar_model = TSAREncoderDecoder(input_size=dataset.n_variables, **config)
+
+    model = TSClassifier(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
+        encoder=ar_model,
         **config,
     )
+
     model = load_model(
         model_basepath=os.path.join("data/models", model_name, dataset_name),
         model=model,
@@ -58,12 +67,14 @@ def torch_test_step(
         f"{model_name}_{dataset_name}_{int(100*pmiss)}.parquet",
     )
 
-    tester.test(
+    acc = tester.test(
         dataset=dataset,
         device=device,
         save_path=save_path,
         **torch_tester,
     )
+
+    return acc
 
 
 def general_step_tester(
@@ -122,6 +133,7 @@ def test(
 ) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_path = pathlib.Path("data/feature")
+    all_results = {}
     for model_name in models:
         config = models_config[model_name]
         print(f"Testing model: {model_name}")
@@ -129,13 +141,13 @@ def test(
         for dataset_name in datasets:
             print(f"---> Dataset: {dataset_name}")
             dataset_path = base_path / dataset_name
-
+            all_miss = []
             for pmiss in pmisses:
                 print(f"---> Missing percentage: {int(100*pmiss)}")
                 pmiss_path = dataset_path / f"{int(100*pmiss)}_missing"
 
                 if config["torch"]:
-                    torch_test_step(
+                    acc = torch_test_step(
                         pmiss_path,
                         dataset_name,
                         pmiss,
@@ -145,6 +157,7 @@ def test(
                         torch_tester,
                         device,
                     )
+                    all_miss.append(acc)
                 else:
                     general_step_tester(
                         pmiss_path,
@@ -154,3 +167,8 @@ def test(
                         config,
                         general_tester,
                     )
+
+            uniplot.plot(
+                xs=[pmisses],
+                ys=[all_miss],
+            )

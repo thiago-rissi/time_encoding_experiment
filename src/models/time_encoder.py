@@ -14,7 +14,11 @@ class PositionalEncoding(nn.Module):
         )
 
     def forward(self, position):
-        pe = torch.empty(position.shape[0], self.hidden_size, device=position.device)
-        pe[:, 0::2] = torch.sin(position * self.div_term.to(position.device))
-        pe[:, 1::2] = torch.cos(position * self.div_term.to(position.device))
+        pe = torch.empty(*position.shape, self.hidden_size, device=position.device)
+        pe[..., 0::2] = torch.sin(
+            position.unsqueeze(-1) * self.div_term.to(position.device)
+        )
+        pe[..., 1::2] = torch.cos(
+            position.unsqueeze(-1) * self.div_term.to(position.device)
+        )
         return self.dropout(pe)

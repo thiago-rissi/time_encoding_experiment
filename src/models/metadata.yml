@@ -24,6 +24,8 @@ TSAREncoderDecoder:
   time_encoding:
     time_encoding_size: 50
     dropout: 0.0
+  decoder:
+    hidden_size: 100
 
 RidgeClassifier:
   rocket: true

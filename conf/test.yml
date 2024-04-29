@@ -1,18 +1,19 @@
 datasets:
   - ERing
   - Epilepsy
-  - Heartbeat
-  - UWaveGestureLibrary
-  - ArticularyWordRecognition
-  - EthanolConcentration
-  - Libras
-  - AsphaltPavementTypeCoordinates
-  - FingerMovements
-  - Handwriting
+  # - Heartbeat
+  # - UWaveGestureLibrary
+  # - ArticularyWordRecognition
+  # - EthanolConcentration
+  # - Libras
+  # - AsphaltPavementTypeCoordinates
+  # - FingerMovements
+  # - Handwriting
 models:
+  - TSAREncoderDecoder
   # - TSClassifier
-  - RidgeClassifier
-  # - CanonicalIntervalForest
+  # - RidgeClassifier
+  - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
 pmisses:
@@ -29,6 +30,6 @@ torch_tester:
   base_path: data/outputs
 general_tester:
   base_path: data/outputs
-  add_encoding: true
+  add_encoding: false
   time_encoding_size: 50
   dropout: 0.0

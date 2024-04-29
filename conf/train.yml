@@ -1,34 +1,44 @@
 datasets:
   - ERing
-  - Epilepsy
-  - Heartbeat
-  - UWaveGestureLibrary
-  - ArticularyWordRecognition
-  - EthanolConcentration
-  - Libras
-  - AsphaltPavementTypeCoordinates
-  - FingerMovements
-  - Handwriting
+  # - Epilepsy
+  # - Heartbeat
+  # - UWaveGestureLibrary
+  # - ArticularyWordRecognition
+  # - EthanolConcentration
+  # - Libras
+  # - AsphaltPavementTypeCoordinates
+  # - FingerMovements
+  # - Handwriting
 models:
   # - TSClassifier
-  - TSAREncoderDecoder
+  # - TSAREncoderDecoder
   # - RidgeClassifier
-  # - CanonicalIntervalForest
+  - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
   
 torch_trainer:
-  loss: CrossEntropyLoss
-  n_epochs: 500
-  batch_size: 8
-  early_stop: true
-  tol: 1e-4
-  lr: 1e-3
-  snapshot_interval: 10
-  base_path: data/models
+  classification_training:
+    loss: CrossEntropyLoss
+    n_epochs: 500
+    batch_size: 8
+    early_stop: true
+    tol: 1e-3
+    lr: 1e-3
+    snapshot_interval: 500
+    base_path: data/models
+
+  ar_training:
+    n_epochs: 500
+    batch_size: 8
+    early_stop: true
+    tol: 0.15
+    lr: 1e-3
+    snapshot_interval: 10
+    base_path: data/models
 
 general_trainer:
   base_path: data/models
-  add_encoding: true
+  add_encoding: false
   time_encoding_size: 50
   dropout: 0.0

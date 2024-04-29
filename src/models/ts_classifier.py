@@ -33,6 +33,7 @@ class ARRNN(nn.Module):
     def __init__(
         self,
         input_size: int,
+        time_encoding_size: int,
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
@@ -40,7 +41,7 @@ class ARRNN(nn.Module):
     ) -> None:
         super().__init__()
         self.encoder = GRU(
-            input_size=input_size,
+            input_size=input_size + time_encoding_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=batch_first,
@@ -50,21 +51,28 @@ class ARRNN(nn.Module):
 
     def forward(
         self, X: torch.Tensor, encoded_timestamps: torch.Tensor, mask: torch.Tensor
-    ) -> torch.Tensor:
-        output_sequence = torch.empty((X.shape[0], X.shape[1] - 1, X.shape[2]))
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        output_sequence = torch.empty(
+            (X.shape[0], X.shape[1] - 1, X.shape[2]), device=X.device
+        )
 
-        h_t = torch.zeros((1, X.shape[0], self.encoder.hidden_size))
-        for i in range(0, X.shape[0] - 1):
-            if i == 0 or mask[i] == 1:
-                input = torch.cat([X[i], encoded_timestamps[i + 1]], dim=0)
-            else:
-                input = torch.cat([out, encoded_timestamps[i + 1]], dim=0)
+        h_t = torch.zeros((1, X.shape[0], self.encoder.hidden_size), device=X.device)
+        y_hat = torch.zeros((X.shape[0], 1, X.shape[2]), device=X.device)
+        for i in range(0, X.shape[1] - 1):
+            input = torch.cat(
+                [
+                    torch.where(mask[:, [i], None] | (i == 0), X[:, [i]], y_hat),
+                    encoded_timestamps[:, [i + 1]],
+                ],
+                dim=-1,
+            )
 
-            out, h_t = self.encoder(input.unsqueeze(0), h_t)
+            out, h_t = self.encoder(input, h_t)
 
-            output_sequence[:, i] = self.linear(out)
+            y_hat = self.linear(out)
+            output_sequence[:, i] = y_hat.squeeze(1)
 
-        return output_sequence
+        return output_sequence, h_t
 
 
 class Transformer(nn.Module):
@@ -213,29 +221,39 @@ class TSAREncoderDecoder(nn.Module):
 
         self.encoder_wrapper = ARRNN(
             input_size=input_size,
+            time_encoding_size=self.time_encoder.hidden_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=batch_first,
         )
 
     def forward(
-        self, X: torch.Tensor, timestamps: torch.Tensor, mask: torch.Tensor
-    ) -> torch.Tensor:
+        self,
+        X: torch.Tensor,
+        timestamps: torch.Tensor,
+        mask: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+
+        if mask is None:
+            mask = torch.ones(
+                (X.shape[0], X.shape[-1]), device=X.device, dtype=torch.bool
+            )
+
         X = X.swapaxes(1, 2)
         if self.time_encoder is not None:
             encoded_timestamps = self.time_encoder(timestamps)
 
-        X_encoded = self.encoder_wrapper(
+        X_encoded, h_t = self.encoder_wrapper(
             X=X, encoded_timestamps=encoded_timestamps, mask=mask
         )
 
-        return X_encoded
+        return X_encoded, h_t
 
 
 class TSClassifier(nn.Module):
     def __init__(
         self,
-        encoder: dict,
+        encoder: TSAREncoderDecoder,
         decoder: dict,
         num_classes: int,
         num_features: int,
@@ -245,12 +263,10 @@ class TSClassifier(nn.Module):
 
         super().__init__()
 
-        self.encoder = TSEncoder(
-            num_features=num_features, t_length=t_length, **encoder
-        )
+        self.encoder = encoder
         self.decoder = TSDecoder(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
-        x_encoded = self.encoder(X, timestamps)
-        y_hat = self.decoder(x_encoded)
+        _, x_encoded = self.encoder(X, timestamps)
+        y_hat = self.decoder(x_encoded.squeeze(0))
         return y_hat

@@ -12,17 +12,11 @@ from pre_process_code.rocket import apply_rocket
 def sample_random_t_inference(
     min_timestamp: float,
     max_timestamp: float,
-    max_context_window_size: float,
-    max_forecast_window_size: float | None = None,
 ) -> torch.Tensor:
     base_random = torch.rand(1)
 
-    lbound = min_timestamp + max_context_window_size
-    ubound = (
-        max_timestamp
-        if max_forecast_window_size is None
-        else max_timestamp - max_forecast_window_size
-    )
+    lbound = min_timestamp
+    ubound = max_timestamp
     interval = (ubound - lbound) * base_random
     t_inference = lbound + interval
 
@@ -106,12 +100,18 @@ class TorchDataset:
         return self.n_instances
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
+
+        t_inf = sample_random_t_inference(
+            min_timestamp=0.0,
+            max_timestamp=self.timestamps.max().item(),
+        ).to(self.X.device)
+
         x_i = self.X[idx]
         y_i = self.y[idx]
 
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
-        return x_i[:, ids], y_i, self.timestamps[ids]
+        return x_i[:, ids], y_i, self.timestamps[ids] - t_inf
 
 
 class TorchARDataset:
@@ -151,18 +151,16 @@ class TorchARDataset:
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
         t_inf = sample_random_t_inference(
-            min_timestamp=0,
-            max_timestamp=self.t_length,
-            max_context_window_size=10,
-            max_forecast_window_size=10,
-        )
+            min_timestamp=0.0,
+            max_timestamp=self.timestamps.max().item(),
+        ).to(self.X.device)
         x_i = self.X[idx]
 
-        mask = torch.ones(x_i.shape[1], dtype=torch.bool)
+        mask = torch.ones(x_i.shape[1], dtype=torch.bool, device=self.X.device)
 
         # sample 0.2 of the data to be missing
         mask[torch.randperm(mask.shape[0])[: int(0.2 * mask.shape[0])]] = False
 
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
-        return x_i[:, ids], self.timestamps[ids], mask
+        return x_i[:, ids], self.timestamps[ids] - t_inf, mask[ids]

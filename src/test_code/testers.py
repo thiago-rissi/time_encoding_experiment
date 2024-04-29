@@ -42,7 +42,7 @@ class TorchTester:
         save_path: str,
         num_workers: int = 0,
         **kwargs,
-    ) -> None:
+    ) -> float:
         device_ = torch.device(device)
         self.model.to(device_)
 
@@ -65,6 +65,11 @@ class TorchTester:
 
         y = np.concatenate(ys)
         y_hat = np.concatenate(ys_hat)
-        print(accuracy_score(y, y_hat))
+        acc = accuracy_score(y, y_hat)
+        print(acc)
         results = pl.DataFrame({"y": y, "y_hat": y_hat})
-        results.write_parquet(pathlib.Path(save_path))
+
+        s = pathlib.Path(save_path)
+        s.parent.mkdir(exist_ok=True, parents=True)
+        results.write_parquet(s)
+        return acc

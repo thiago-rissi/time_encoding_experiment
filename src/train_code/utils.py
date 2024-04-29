@@ -32,30 +32,46 @@ def torch_train_step(
 
     ar_model = TSAREncoderDecoder(input_size=ar_dataset.n_variables, **config)
 
-    ar_trainer = TorchARTrainer(model=ar_model, **torch_trainer)
+    ar_trainer_config = torch_trainer["ar_training"]
+    ar_trainer = TorchARTrainer(model=ar_model, **ar_trainer_config)
+    save_path = (
+        pathlib.Path(ar_trainer_config["base_path"]) / model_name
+    ) / dataset_name
+
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    ar_trainer.train(
+        dataset=ar_dataset, save_path=save_path, device=device, **ar_trainer_config
+    )
 
     #########################
 
+    class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
         dataset_path=dataset_path / f"{dataset_name}_train.ts",
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
     )
-    model_class = getattr(sys.modules[__name__], model_name)
-    model = model_class(
+
+    model = TSClassifier(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
+        encoder=ar_model,
         **config,
     )
 
-    trainer = TorchTrainer(model=model, **torch_trainer)
-    save_path = (pathlib.Path(torch_trainer["base_path"]) / model_name) / dataset_name
+    trainer = TorchTrainer(model=model, **class_trainer_config)
+    save_path = (
+        pathlib.Path(class_trainer_config["base_path"]) / model_name
+    ) / dataset_name
 
     save_path.mkdir(parents=True, exist_ok=True)
     i_time = datetime.datetime.now()
-    trainer.train(dataset=dataset, device=device, save_path=save_path, **torch_trainer)
+    trainer.train(
+        dataset=dataset, device=device, save_path=save_path, **class_trainer_config
+    )
     f_time = datetime.datetime.now()
 
     print(f"Training duration: {f_time - i_time}")
@@ -112,6 +128,7 @@ def train(
 ):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
     base_path = pathlib.Path("data/feature")
     for model_name in models:
         config = models_config[model_name]
