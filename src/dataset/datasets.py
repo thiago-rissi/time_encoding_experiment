@@ -9,6 +9,26 @@ from models.time_encoder import PositionalEncoding
 from pre_process_code.rocket import apply_rocket
 
 
+def sample_random_t_inference(
+    min_timestamp: float,
+    max_timestamp: float,
+    max_context_window_size: float,
+    max_forecast_window_size: float | None = None,
+) -> torch.Tensor:
+    base_random = torch.rand(1)
+
+    lbound = min_timestamp + max_context_window_size
+    ubound = (
+        max_timestamp
+        if max_forecast_window_size is None
+        else max_timestamp - max_forecast_window_size
+    )
+    interval = (ubound - lbound) * base_random
+    t_inference = lbound + interval
+
+    return t_inference
+
+
 class GeneralDataset:
     def __init__(
         self,
@@ -92,3 +112,57 @@ class TorchDataset:
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
         return x_i[:, ids], y_i, self.timestamps[ids]
+
+
+class TorchARDataset:
+    def __init__(
+        self,
+        dataset_path: pathlib.Path,
+        dataset_name: str,
+        nan_strategy: str,
+        device: torch.device,
+        normalize: bool = False,
+        statistics: dict | None = None,
+    ) -> None:
+
+        self.statistics = statistics
+        X, _ = load_from_tsfile(str(dataset_path))
+        metadata = get_dataset_metadata(dataset_name)
+
+        X = torch.tensor(X, device=device, dtype=torch.float32)
+
+        self.n_instances = X.shape[0]
+        self.n_variables = X.shape[1]
+        self.t_length = X.shape[2]
+
+        if (statistics == None) and (normalize == True):
+            self.statistics = calculate_stats(X)
+
+        if normalize == True:
+            X = normalize(X, self.statistics)
+
+        self.X = X
+        self.timestamps = torch.arange(self.t_length, device=device)
+        self.nan_strategy = nan_strategy
+
+    def __len__(self) -> int:
+        return self.n_instances
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
+
+        t_inf = sample_random_t_inference(
+            min_timestamp=0,
+            max_timestamp=self.t_length,
+            max_context_window_size=10,
+            max_forecast_window_size=10,
+        )
+        x_i = self.X[idx]
+
+        mask = torch.ones(x_i.shape[1], dtype=torch.bool)
+
+        # sample 0.2 of the data to be missing
+        mask[torch.randperm(mask.shape[0])[: int(0.2 * mask.shape[0])]] = False
+
+        ids = torch.where(~torch.isnan(x_i[0]))[0]
+
+        return x_i[:, ids], self.timestamps[ids], mask

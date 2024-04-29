@@ -11,7 +11,8 @@ datasets:
   - Handwriting
 models:
   # - TSClassifier
-  - RidgeClassifier
+  - TSAREncoderDecoder
+  # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier

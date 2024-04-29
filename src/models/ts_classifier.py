@@ -198,9 +198,10 @@ class TSAREncoderDecoder(nn.Module):
     def __init__(
         self,
         time_encoding: dict,
-        ts_encoding: dict,
-        num_features: int,
-        t_length: int,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        batch_first: bool,
         **kwargs,
     ) -> None:
 
@@ -211,9 +212,10 @@ class TSAREncoderDecoder(nn.Module):
             self.time_encoder = PositionalEncoding(**time_encoding)
 
         self.encoder_wrapper = ARRNN(
-            input_size=num_features + self.time_encoding_size,
-            t_length=t_length,
-            **ts_encoding,
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=batch_first,
         )
 
     def forward(

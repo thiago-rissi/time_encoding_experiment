@@ -14,6 +14,17 @@ TSClassifier:
   decoder:
     hidden_size: 100
 
+TSAREncoderDecoder:
+  torch: true
+  test_nan: true
+  max_len: 1000
+  hidden_size: 100
+  num_layers: 1
+  batch_first: True
+  time_encoding:
+    time_encoding_size: 50
+    dropout: 0.0
+
 RidgeClassifier:
   rocket: true
   torch: false

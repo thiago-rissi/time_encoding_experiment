@@ -1,7 +1,7 @@
 import pathlib
 import torch
 import sys
-from models.ts_classifier import TSClassifier
+from models.ts_classifier import TSClassifier, TSAREncoderDecoder
 from models.resnet import ResNet50
 from train_code.trainers import *
 from dataset.utils import *
@@ -22,6 +22,20 @@ def torch_train_step(
     torch_trainer: dict,
     device: torch.device,
 ) -> None:
+
+    ar_dataset = TorchARDataset(
+        dataset_path=dataset_path / f"{dataset_name}_train.ts",
+        dataset_name=dataset_name,
+        nan_strategy=datasets_config["nan_strategy"][dataset_name],
+        device=device,
+    )
+
+    ar_model = TSAREncoderDecoder(input_size=ar_dataset.n_variables, **config)
+
+    ar_trainer = TorchARTrainer(model=ar_model, **torch_trainer)
+
+    #########################
+
     dataset = TorchDataset(
         dataset_path=dataset_path / f"{dataset_name}_train.ts",
         dataset_name=dataset_name,
