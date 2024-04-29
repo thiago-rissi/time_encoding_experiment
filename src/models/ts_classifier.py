@@ -29,6 +29,44 @@ class RNN(nn.Module):
         return X_encoded[:, -1, :]
 
 
+class ARRNN(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        batch_first: bool,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+        self.encoder = GRU(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=batch_first,
+        )
+
+        self.linear = nn.Linear(in_features=hidden_size, out_features=input_size)
+
+    def forward(
+        self, X: torch.Tensor, encoded_timestamps: torch.Tensor, mask: torch.Tensor
+    ) -> torch.Tensor:
+        output_sequence = torch.empty((X.shape[0], X.shape[1] - 1, X.shape[2]))
+
+        h_t = torch.zeros((1, X.shape[0], self.encoder.hidden_size))
+        for i in range(0, X.shape[0] - 1):
+            if i == 0 or mask[i] == 1:
+                input = torch.cat([X[i], encoded_timestamps[i + 1]], dim=0)
+            else:
+                input = torch.cat([out, encoded_timestamps[i + 1]], dim=0)
+
+            out, h_t = self.encoder(input.unsqueeze(0), h_t)
+
+            output_sequence[:, i] = self.linear(out)
+
+        return output_sequence
+
+
 class Transformer(nn.Module):
     def __init__(
         self,
@@ -154,6 +192,42 @@ class TSDecoder(nn.Module):
         y_hat = self.projective_linear(x_internal)
 
         return y_hat
+
+
+class TSAREncoderDecoder(nn.Module):
+    def __init__(
+        self,
+        time_encoding: dict,
+        ts_encoding: dict,
+        num_features: int,
+        t_length: int,
+        **kwargs,
+    ) -> None:
+
+        super().__init__()
+        self.time_encoder: nn.Module | None = None
+
+        if time_encoding is not None:
+            self.time_encoder = PositionalEncoding(**time_encoding)
+
+        self.encoder_wrapper = ARRNN(
+            input_size=num_features + self.time_encoding_size,
+            t_length=t_length,
+            **ts_encoding,
+        )
+
+    def forward(
+        self, X: torch.Tensor, timestamps: torch.Tensor, mask: torch.Tensor
+    ) -> torch.Tensor:
+        X = X.swapaxes(1, 2)
+        if self.time_encoder is not None:
+            encoded_timestamps = self.time_encoder(timestamps)
+
+        X_encoded = self.encoder_wrapper(
+            X=X, encoded_timestamps=encoded_timestamps, mask=mask
+        )
+
+        return X_encoded
 
 
 class TSClassifier(nn.Module):
