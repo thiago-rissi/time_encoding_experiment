@@ -40,6 +40,8 @@ class ARRNN(nn.Module):
         **kwargs,
     ) -> None:
         super().__init__()
+
+        self.num_layers = num_layers
         self.encoder = GRU(
             input_size=input_size + time_encoding_size,
             hidden_size=hidden_size,
@@ -56,7 +58,9 @@ class ARRNN(nn.Module):
             (X.shape[0], X.shape[1] - 1, X.shape[2]), device=X.device
         )
 
-        h_t = torch.zeros((1, X.shape[0], self.encoder.hidden_size), device=X.device)
+        h_t = torch.zeros(
+            (self.num_layers, X.shape[0], self.encoder.hidden_size), device=X.device
+        )
         y_hat = torch.zeros((X.shape[0], 1, X.shape[2]), device=X.device)
         for i in range(0, X.shape[1] - 1):
             input = torch.cat(
@@ -72,7 +76,7 @@ class ARRNN(nn.Module):
             y_hat = self.linear(out)
             output_sequence[:, i] = y_hat.squeeze(1)
 
-        return output_sequence, h_t
+        return output_sequence, h_t[-1]
 
 
 class Transformer(nn.Module):

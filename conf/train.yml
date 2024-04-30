@@ -1,7 +1,7 @@
 datasets:
-  - ERing
+  # - ERing
   # - Epilepsy
-  # - Heartbeat
+  - Heartbeat
   # - UWaveGestureLibrary
   # - ArticularyWordRecognition
   # - EthanolConcentration
@@ -11,9 +11,9 @@ datasets:
   # - Handwriting
 models:
   # - TSClassifier
-  # - TSAREncoderDecoder
+  - TSAREncoderDecoder
   # - RidgeClassifier
-  - CanonicalIntervalForest
+  # - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
   
@@ -25,14 +25,14 @@ torch_trainer:
     early_stop: true
     tol: 1e-3
     lr: 1e-3
-    snapshot_interval: 500
+    snapshot_interval: 10
     base_path: data/models
 
   ar_training:
-    n_epochs: 500
+    n_epochs: 200
     batch_size: 8
     early_stop: true
-    tol: 0.15
+    tol: 0.2
     lr: 1e-3
     snapshot_interval: 10
     base_path: data/models

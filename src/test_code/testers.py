@@ -30,7 +30,7 @@ class TorchTester:
     ) -> tuple[torch.Tensor, float | torch.Tensor]:
         self.model.eval()
         y_hat = self.model(X, timestamps)
-        loss = self.loss_func(y_hat, y)
+        loss = self.loss_func(y_hat, y.squeeze())
 
         return y_hat, loss
 
@@ -58,7 +58,7 @@ class TorchTester:
         for i, (X, y, timestamps) in enumerate((pbar := tqdm(test_dataloader))):
             with torch.no_grad():
                 y_hat, loss = self.predict(X, y, timestamps)
-                y_hat = np.argmax(y_hat.cpu(), axis=1)
+                y_hat = np.argmax(y_hat.cpu(), keepdims=True)
                 y = y.cpu()
                 ys.append(y)
                 ys_hat.append(y_hat)

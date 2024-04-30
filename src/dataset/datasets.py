@@ -106,6 +106,8 @@ class TorchDataset:
             max_timestamp=self.timestamps.max().item(),
         ).to(self.X.device)
 
+        # t_inf = t_inf * 0.0
+
         x_i = self.X[idx]
         y_i = self.y[idx]
 

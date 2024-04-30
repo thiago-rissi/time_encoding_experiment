@@ -18,14 +18,14 @@ TSAREncoderDecoder:
   torch: true
   test_nan: true
   max_len: 1000
-  hidden_size: 100
+  hidden_size: 400
   num_layers: 1
   batch_first: True
   time_encoding:
-    time_encoding_size: 50
+    time_encoding_size: 100
     dropout: 0.0
   decoder:
-    hidden_size: 100
+    hidden_size: 400
 
 RidgeClassifier:
   rocket: true

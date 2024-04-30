@@ -38,8 +38,7 @@ def torch_train_step(
         pathlib.Path(ar_trainer_config["base_path"]) / model_name
     ) / dataset_name
 
-    save_path.mkdir(parents=True, exist_ok=True)
-
+    print(f"Training AR: {model_name}")
     ar_trainer.train(
         dataset=ar_dataset, save_path=save_path, device=device, **ar_trainer_config
     )
@@ -69,6 +68,7 @@ def torch_train_step(
 
     save_path.mkdir(parents=True, exist_ok=True)
     i_time = datetime.datetime.now()
+    print(f"Training Classification: {model_name}")
     trainer.train(
         dataset=dataset, device=device, save_path=save_path, **class_trainer_config
     )
