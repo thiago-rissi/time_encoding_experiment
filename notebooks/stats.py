@@ -3,6 +3,7 @@ import pathlib
 import numpy as np
 from typing import Any
 from itertools import product
+import pandas as pd
 
 
 def calculate_metrics(
@@ -10,7 +11,7 @@ def calculate_metrics(
     base_path: pathlib.Path,
     datasets: list[str],
     models: list[str],
-    pmisses=list[int],
+    pmisses: list[int],
     func_params: dict | None = None,
 ) -> dict[str, list[float]]:
 
@@ -51,10 +52,29 @@ def calculate_metrics(
     return results, model_mean, pmiss_result
 
 
-def calculate_mean_ranks(
-    results: dict[str, Any], models: list[str], datasets: list[str]
-) -> dict[str, list[float]]:
+def gather_metric_cd(
+    func_metric: Any,
+    metric_name: str,
+    base_path: pathlib.Path,
+    datasets: list[str],
+    models: list[str],
+    pmiss: int,
+    func_params: dict | None = None,
+) -> pd.DataFrame:
+    results = {"classifier_name": [], "dataset_name": [], metric_name: []}
+    for dataset, model in product(datasets, models):
+        df_path = base_path / f"{model}_{dataset}_{pmiss}.parquet"
+        df = pl.read_parquet(df_path)
 
-    ranks = {}
-    for dataset in datasets:
-        pass
+        if func_params == None:
+            metric = func_metric(df["y_hat"], df["y"])
+        else:
+            metric = func_metric(df["y_hat"], df["y"], **func_params)
+
+        results["classifier_name"].append(model)
+        results["dataset_name"].append(dataset)
+        results[metric_name].append(metric)
+
+    df = pd.DataFrame(results)
+
+    return df
