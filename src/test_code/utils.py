@@ -18,6 +18,8 @@ def load_model(
         list(pathlib.Path(model_basepath).rglob("*.pkl")),
         key=lambda x: int(x.stem.split("_")[-1]),
     )[-1]
+
+    # model_path = pathlib.Path("data/models/TSAREncoderDecoder/Heartbeat/model_20.pkl")
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 

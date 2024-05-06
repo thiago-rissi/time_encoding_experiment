@@ -1,3 +1,4 @@
+from numpy import atleast_2d
 import torch
 import polars as pl
 import torch.nn as nn
@@ -7,29 +8,6 @@ from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
 
 
 class RNN(nn.Module):
-    def __init__(
-        self,
-        input_size: int,
-        hidden_size: int,
-        num_layers: int,
-        batch_first: bool,
-        **kwargs,
-    ) -> None:
-        super().__init__()
-        self.encoder = GRU(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=batch_first,
-        )
-
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
-        X_encoded, _ = self.encoder(X)
-
-        return X_encoded[:, -1, :]
-
-
-class ARRNN(nn.Module):
     def __init__(
         self,
         input_size: int,
@@ -49,51 +27,31 @@ class ARRNN(nn.Module):
             batch_first=batch_first,
         )
 
-        self.linear = nn.Linear(in_features=hidden_size, out_features=input_size)
-
     def forward(
-        self, X: torch.Tensor, encoded_timestamps: torch.Tensor, mask: torch.Tensor
+        self, X: torch.Tensor, encoded_timestamps: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        output_sequence = torch.empty(
-            (X.shape[0], X.shape[1] - 1, X.shape[2]), device=X.device
-        )
 
-        h_t = torch.zeros(
-            (self.num_layers, X.shape[0], self.encoder.hidden_size), device=X.device
-        )
-        y_hat = torch.zeros((X.shape[0], 1, X.shape[2]), device=X.device)
-        for i in range(0, X.shape[1] - 1):
-            input = torch.cat(
-                [
-                    torch.where(mask[:, [i], None] | (i == 0), X[:, [i]], y_hat),
-                    encoded_timestamps[:, [i + 1]],
-                ],
-                dim=-1,
-            )
+        X = torch.cat([X, encoded_timestamps], dim=-1)
+        _, h_t = self.encoder(X)
 
-            out, h_t = self.encoder(input, h_t)
-
-            y_hat = self.linear(out)
-            output_sequence[:, i] = y_hat.squeeze(1)
-
-        return output_sequence, h_t[-1]
+        return h_t[-1]
 
 
 class Transformer(nn.Module):
     def __init__(
         self,
         input_size: int,
+        time_encoding_size: int,
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
-        t_length: int,
         **kwargs,
     ) -> None:
         super().__init__()
         encoder_layer = TransformerEncoderLayer(
             batch_first=batch_first,
-            d_model=input_size,
-            nhead=1,
+            d_model=input_size + time_encoding_size,
+            nhead=4,
         )
         self.encoder = TransformerEncoder(
             encoder_layer=encoder_layer,
@@ -101,7 +59,8 @@ class Transformer(nn.Module):
         )
 
         self.linear = nn.Linear(
-            in_features=input_size * t_length, out_features=hidden_size
+            in_features=(input_size + time_encoding_size) * t_length,
+            out_features=hidden_size,
         )
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
@@ -190,18 +149,39 @@ class TSEncoder(nn.Module):
 
 
 class TSDecoder(nn.Module):
-    def __init__(self, num_classes, hidden_size: int, **kwargs) -> None:
+    def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
         super().__init__()
-
+        self.bn1 = nn.BatchNorm1d(hidden_size)
+        self.bn2 = nn.BatchNorm1d(hidden_size)
         self.internal_linear = nn.Linear(hidden_size, hidden_size)
+
+        self.dropout = nn.Dropout(p=dropout)
         self.relu = nn.ReLU()
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-
-        x_internal = self.internal_linear(x)
+        if len(x.shape) == 1:
+            x = x.unsqueeze(0)
+        x_internal = self.bn1(x)
         x_internal = self.relu(x_internal)
+        x_internal = self.dropout(x_internal)
+        x_internal = self.internal_linear(x_internal)
+        x_internal = self.bn2(x_internal)
+        x_internal = self.relu(x_internal)
+        x_internal = self.dropout(x_internal)
         y_hat = self.projective_linear(x_internal)
+
+        return y_hat
+
+
+class TSDecoder2(nn.Module):
+    def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
+        super().__init__()
+
+        self.projective_linear = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        y_hat = self.projective_linear(x)
 
         return y_hat
 
@@ -214,6 +194,7 @@ class TSAREncoderDecoder(nn.Module):
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
+        dropout: float,
         **kwargs,
     ) -> None:
 
@@ -223,35 +204,28 @@ class TSAREncoderDecoder(nn.Module):
         if time_encoding is not None:
             self.time_encoder = PositionalEncoding(**time_encoding)
 
-        self.encoder_wrapper = ARRNN(
+        self.encoder_wrapper = RNN(
             input_size=input_size,
             time_encoding_size=self.time_encoder.hidden_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=batch_first,
         )
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(
         self,
         X: torch.Tensor,
         timestamps: torch.Tensor,
-        mask: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-
-        if mask is None:
-            mask = torch.ones(
-                (X.shape[0], X.shape[-1]), device=X.device, dtype=torch.bool
-            )
 
         X = X.swapaxes(1, 2)
         if self.time_encoder is not None:
             encoded_timestamps = self.time_encoder(timestamps)
 
-        X_encoded, h_t = self.encoder_wrapper(
-            X=X, encoded_timestamps=encoded_timestamps, mask=mask
-        )
+        h_t = self.encoder_wrapper(X=X, encoded_timestamps=encoded_timestamps)
 
-        return X_encoded, h_t
+        return h_t
 
 
 class TSClassifier(nn.Module):
@@ -268,9 +242,9 @@ class TSClassifier(nn.Module):
         super().__init__()
 
         self.encoder = encoder
-        self.decoder = TSDecoder(num_classes=num_classes, **decoder)
+        self.decoder = TSDecoder2(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
-        _, x_encoded = self.encoder(X, timestamps)
-        y_hat = self.decoder(x_encoded.squeeze(0))
+        h_t = self.encoder(X, timestamps)
+        y_hat = self.decoder(h_t.squeeze(0))
         return y_hat

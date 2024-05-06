@@ -21,7 +21,7 @@ torch_trainer:
   classification_training:
     loss: CrossEntropyLoss
     n_epochs: 500
-    batch_size: 8
+    batch_size: 32
     early_stop: true
     tol: 1e-3
     lr: 1e-3
@@ -30,9 +30,9 @@ torch_trainer:
 
   ar_training:
     n_epochs: 200
-    batch_size: 8
+    batch_size: 32
     early_stop: true
-    tol: 0.2
+    tol: 0.15
     lr: 1e-3
     snapshot_interval: 10
     base_path: data/models

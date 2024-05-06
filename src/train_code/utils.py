@@ -38,10 +38,10 @@ def torch_train_step(
         pathlib.Path(ar_trainer_config["base_path"]) / model_name
     ) / dataset_name
 
-    print(f"Training AR: {model_name}")
-    ar_trainer.train(
-        dataset=ar_dataset, save_path=save_path, device=device, **ar_trainer_config
-    )
+    # print(f"Training AR: {model_name}")
+    # ar_trainer.train(
+    #     dataset=ar_dataset, save_path=save_path, device=device, **ar_trainer_config
+    # )
 
     #########################
 
