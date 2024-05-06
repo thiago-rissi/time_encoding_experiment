@@ -1,14 +1,14 @@
 datasets:
-  # - ERing
-  # - Epilepsy
+  - ERing
+  - Epilepsy
   - Heartbeat
-  # - UWaveGestureLibrary
-  # - ArticularyWordRecognition
-  # - EthanolConcentration
-  # - Libras
-  # - AsphaltPavementTypeCoordinates
-  # - FingerMovements
-  # - Handwriting
+  - UWaveGestureLibrary
+  - ArticularyWordRecognition
+  - EthanolConcentration
+  - Libras
+  - AsphaltPavementTypeCoordinates
+  - FingerMovements
+  - Handwriting
 models:
   - TSAREncoderDecoder
   # - TSClassifier
