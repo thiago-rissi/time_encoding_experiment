@@ -7,7 +7,7 @@ from dataset.utils import *
 from dataset.datasets import *
 from test_code.testers import *
 import os
-from models.ts_classifier import TSAREncoderDecoder, TSClassifier
+from models.ts_classifier import TSClassifier  # TSAREncoderDecoder,
 from sktime.classification.deep_learning import ResNetClassifier
 
 
@@ -46,16 +46,16 @@ def torch_test_step(
         device=device,
     )
 
-    ar_model = TSAREncoderDecoder(input_size=dataset.n_variables, **config)
+    # ar_model = TSAREncoderDecoder(input_size=dataset.n_variables, **config)
 
     model = TSClassifier(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        encoder=ar_model,
         **config,
     )
 
+    model_name = model_name + config["encoder"]["ts_encoding"]["encoder_class"]
     model = load_model(
         model_basepath=os.path.join("data/models", model_name, dataset_name),
         model=model,

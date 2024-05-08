@@ -1,7 +1,7 @@
 import pathlib
 import torch
 import sys
-from models.ts_classifier import TSClassifier, TSAREncoderDecoder
+from models.ts_classifier import TSClassifier  # , TSAREncoderDecoder
 from models.resnet import ResNet50
 from train_code.trainers import *
 from dataset.utils import *
@@ -23,20 +23,17 @@ def torch_train_step(
     device: torch.device,
 ) -> None:
 
-    ar_dataset = TorchARDataset(
-        dataset_path=dataset_path / f"{dataset_name}_train.ts",
-        dataset_name=dataset_name,
-        nan_strategy=datasets_config["nan_strategy"][dataset_name],
-        device=device,
-    )
+    # ar_dataset = TorchARDataset(
+    #     dataset_path=dataset_path / f"{dataset_name}_train.ts",
+    #     dataset_name=dataset_name,
+    #     nan_strategy=datasets_config["nan_strategy"][dataset_name],
+    #     device=device,
+    # )
 
-    ar_model = TSAREncoderDecoder(input_size=ar_dataset.n_variables, **config)
+    # ar_model = TSAREncoderDecoder(input_size=ar_dataset.n_variables, **config)
 
-    ar_trainer_config = torch_trainer["ar_training"]
-    ar_trainer = TorchARTrainer(model=ar_model, **ar_trainer_config)
-    save_path = (
-        pathlib.Path(ar_trainer_config["base_path"]) / model_name
-    ) / dataset_name
+    # ar_trainer_config = torch_trainer["ar_training"]
+    # ar_trainer = TorchARTrainer(model=ar_model, **ar_trainer_config)
 
     # print(f"Training AR: {model_name}")
     # ar_trainer.train(
@@ -44,6 +41,11 @@ def torch_train_step(
     # )
 
     #########################
+
+    model_name = model_name + config["encoder"]["ts_encoding"]["encoder_class"]
+    save_path = (
+        pathlib.Path(torch_trainer["classification_training"]["base_path"]) / model_name
+    ) / dataset_name
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
@@ -57,7 +59,6 @@ def torch_train_step(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        encoder=ar_model,
         **config,
     )
 
