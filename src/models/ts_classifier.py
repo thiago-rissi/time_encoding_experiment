@@ -165,7 +165,7 @@ class TSDecoder(nn.Module):
         x_internal = self.dropout(x_internal)
         y_hat = self.projective_linear(x_internal)
 
-        return y_hat
+        return y_hat.squeeze(0)
 
 
 class TSDecoder2(nn.Module):
@@ -250,7 +250,7 @@ class TSClassifier(nn.Module):
         super().__init__()
 
         self.encoder = TSEncoder(input_size=num_features, t_length=t_length, **encoder)
-        self.decoder = TSDecoder2(num_classes=num_classes, **decoder)
+        self.decoder = TSDecoder(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
         h_t = self.encoder(X, timestamps)
