@@ -261,11 +261,12 @@ class TSClassifier(nn.Module):
         self.decoder = TSDecoder2(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
-        # if self.training:
-        #     out = X + torch.rand_like(X) * 0.05
-        # else:
-        #     out = X
-        out = X + torch.rand_like(X) * 0.05
+
+        if self.training:
+            out = X + (2 * torch.rand_like(X) - 1) * 0.01
+        else:
+            out = X
+
         h_t = self.encoder(out, timestamps)
         y_hat = self.decoder(h_t.squeeze(0))
         return y_hat

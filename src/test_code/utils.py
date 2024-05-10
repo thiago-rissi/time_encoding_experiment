@@ -15,12 +15,12 @@ def load_model(
     model_basepath: str, model: nn.Module, device: torch.device
 ) -> nn.Module:
     model_path = sorted(
-        list(pathlib.Path(model_basepath).rglob("*.pkl")),
-        key=lambda x: int(x.stem.split("_")[-1]),
+        list(pathlib.Path(model_basepath).rglob("*best.pkl")),
+        key=lambda x: int(x.stem.split("_")[-2]),
     )[-1]
 
     # model_path = pathlib.Path(
-    #     "data/models/TSClassifierTransformer/Heartbeat/model_20.pkl"
+    #     "data/models/TSClassifierTransformer/EthanolConcentration/model_20.pkl"
     # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model

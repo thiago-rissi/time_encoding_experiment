@@ -1,14 +1,14 @@
 datasets:
-  # - ERing
-  # - Epilepsy
+  - ERing
+  - Epilepsy
   - Heartbeat
-  # - UWaveGestureLibrary
-  # - ArticularyWordRecognition
-  # - EthanolConcentration
-  # - Libras
-  # - AsphaltPavementTypeCoordinates
-  # - FingerMovements
-  # - Handwriting
+  - UWaveGestureLibrary
+  - ArticularyWordRecognition
+  - EthanolConcentration
+  - Libras
+  - AsphaltPavementTypeCoordinates
+  - FingerMovements
+  - Handwriting
 models:
   - TSClassifier
   # - TSAREncoderDecoder
@@ -20,11 +20,12 @@ models:
 torch_trainer:
   classification_training:
     loss: CrossEntropyLoss
-    n_epochs: 100
+    n_epochs: 500
     batch_size: 32
     early_stop: true
     tol: 1e-3
     lr: 1e-3
+    patience: 50
     snapshot_interval: 10
     base_path: data/models
 
