@@ -19,7 +19,9 @@ def load_model(
         key=lambda x: int(x.stem.split("_")[-1]),
     )[-1]
 
-    # model_path = pathlib.Path("data/models/TSAREncoderDecoder/Heartbeat/model_20.pkl")
+    # model_path = pathlib.Path(
+    #     "data/models/TSClassifierTransformer/Heartbeat/model_120.pkl"
+    # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
@@ -33,6 +35,7 @@ def torch_test_step(
     datasets_config: dict,
     torch_tester: dict,
     device: torch.device,
+    inf_sample_size: int,
 ) -> float:
     test_path = (
         pmiss_path / f"{dataset_name}_{int(100*pmiss)}_nan.ts"
@@ -158,6 +161,7 @@ def test(
                         datasets_config,
                         torch_tester,
                         device,
+                        torch_tester["inf_sample_size"],
                     )
                     all_miss.append(acc)
                 else:

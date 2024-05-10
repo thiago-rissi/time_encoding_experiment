@@ -23,25 +23,6 @@ def torch_train_step(
     device: torch.device,
 ) -> None:
 
-    # ar_dataset = TorchARDataset(
-    #     dataset_path=dataset_path / f"{dataset_name}_train.ts",
-    #     dataset_name=dataset_name,
-    #     nan_strategy=datasets_config["nan_strategy"][dataset_name],
-    #     device=device,
-    # )
-
-    # ar_model = TSAREncoderDecoder(input_size=ar_dataset.n_variables, **config)
-
-    # ar_trainer_config = torch_trainer["ar_training"]
-    # ar_trainer = TorchARTrainer(model=ar_model, **ar_trainer_config)
-
-    # print(f"Training AR: {model_name}")
-    # ar_trainer.train(
-    #     dataset=ar_dataset, save_path=save_path, device=device, **ar_trainer_config
-    # )
-
-    #########################
-
     model_name = model_name + config["encoder"]["ts_encoding"]["encoder_class"]
     save_path = (
         pathlib.Path(torch_trainer["classification_training"]["base_path"]) / model_name
