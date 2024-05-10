@@ -66,6 +66,7 @@ class TorchTrainer:
     def train_epoch(
         self,
         train_dl: DataLoader,
+        validation_dl: DataLoader,
         optimizer: Adam,
         device: torch.device,
     ):
@@ -80,8 +81,18 @@ class TorchTrainer:
                 timestamps=timestamps,
                 optimizer=optimizer,
             )
-            losses.append(loss.item())
             pbar.set_description(f"{i+1}/{len(train_dl)}-{loss.item():.4f}")
+
+        losses = []
+
+        self.model.eval()
+        with torch.no_grad():
+            for i, (X, y, timestamps) in enumerate((pbar := tqdm(validation_dl))):
+                X.to(device)
+                y.to(device)
+                y_hat = self.model(X, timestamps)
+                loss = self.loss_func(y_hat, y)
+                losses.append(loss.item())
         return np.mean(losses)
 
     def train(
@@ -90,7 +101,7 @@ class TorchTrainer:
         n_epochs: int,
         batch_size: int,
         early_stop: bool,
-        tol: float,
+        patience: int,
         lr: float,
         save_path: str,
         snapshot_interval: int,
@@ -102,12 +113,22 @@ class TorchTrainer:
         device_ = torch.device(device)
         self.model.to(device_)
 
+        train_dataset, validation_dataset = dataset.split_dataset(0.9)
+
         train_dataloader = DataLoader(
-            dataset=dataset,
+            dataset=train_dataset,
             batch_size=batch_size,
             num_workers=num_workers,
             shuffle=True,
             drop_last=True,
+        )
+
+        validation_dataloader = DataLoader(
+            dataset=validation_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=False,
+            drop_last=False,
         )
 
         optimizer = Adam(
@@ -115,9 +136,11 @@ class TorchTrainer:
             lr=float(lr),
         )
 
+        best_loss = torch.inf
         for epoch in range(n_epochs):
             loss = self.train_epoch(
                 train_dl=train_dataloader,
+                validation_dl=validation_dataloader,
                 optimizer=optimizer,
                 device=device_,
             )
@@ -126,99 +149,13 @@ class TorchTrainer:
                 save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
 
             if early_stop:
-                if abs(loss) < float(tol):
+                if loss < best_loss:
                     save_model(
-                        self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl"
+                        self.model, pathlib.Path(save_path) / f"model_{epoch}_best.pkl"
                     )
-                    break
+                    best_loss = loss
+                else:
+                    patience -= 1
 
-
-class TorchARTrainer:
-    def __init__(
-        self,
-        model: nn.Module,
-        **kwargs,
-    ) -> None:
-        self.model = model
-        self.loss_func = lambda s, o: -index_agreement_torch(s, o) + 1.0
-
-    def step(
-        self,
-        X: torch.Tensor,
-        mask: torch.Tensor,
-        timestamps: torch.Tensor,
-        optimizer: Optimizer,
-    ):
-        optimizer.zero_grad()
-        y_hat, _ = self.model(X, timestamps, mask=mask)
-        loss = self.loss_func(y_hat, X.swapaxes(1, 2)[:, 1:])
-        loss.backward()
-        optimizer.step()
-
-        return loss
-
-    def train_epoch(
-        self,
-        train_dl: DataLoader,
-        optimizer: Adam,
-        device: torch.device,
-    ):
-        losses = []
-        self.model.train()
-        for i, (X, timestamps, mask) in enumerate((pbar := tqdm(train_dl))):
-            X.to(device)
-            mask.to(device)
-            loss = self.step(
-                X=X,
-                timestamps=timestamps,
-                mask=mask,
-                optimizer=optimizer,
-            )
-            losses.append(loss.item())
-            pbar.set_description(f"{i+1}/{len(train_dl)}-{loss.item():.4f}")
-        return np.mean(losses)
-
-    def train(
-        self,
-        dataset: TorchDataset,
-        n_epochs: int,
-        batch_size: int,
-        early_stop: bool,
-        tol: float,
-        lr: float,
-        save_path: str,
-        snapshot_interval: int,
-        device: torch.device,
-        num_workers: int = 0,
-        **kwargs,
-    ) -> None:
-
-        device_ = torch.device(device)
-        self.model.to(device_)
-
-        train_dataloader = DataLoader(
-            dataset=dataset,
-            batch_size=batch_size,
-            num_workers=num_workers,
-            shuffle=True,
-            drop_last=True,
-        )
-
-        optimizer = Adam(
-            self.model.parameters(),
-            lr=float(lr),
-        )
-
-        for epoch in range(n_epochs):
-            loss = self.train_epoch(
-                train_dl=train_dataloader,
-                optimizer=optimizer,
-                device=device_,
-            )
-
-            # if epoch % snapshot_interval == 0:
-            #     save_model(self.model, pathlib.Path(save_path) / f"model_{epoch}.pkl")
-
-            if early_stop:
-                if abs(loss) < float(tol):
+                if patience == 0:
                     break

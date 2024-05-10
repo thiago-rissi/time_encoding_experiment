@@ -15,11 +15,13 @@ def load_model(
     model_basepath: str, model: nn.Module, device: torch.device
 ) -> nn.Module:
     model_path = sorted(
-        list(pathlib.Path(model_basepath).rglob("*.pkl")),
-        key=lambda x: int(x.stem.split("_")[-1]),
+        list(pathlib.Path(model_basepath).rglob("*best.pkl")),
+        key=lambda x: int(x.stem.split("_")[-2]),
     )[-1]
 
-    # model_path = pathlib.Path("data/models/TSAREncoderDecoder/Heartbeat/model_20.pkl")
+    # model_path = pathlib.Path(
+    #     "data/models/TSClassifierTransformer/EthanolConcentration/model_20.pkl"
+    # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
@@ -33,6 +35,7 @@ def torch_test_step(
     datasets_config: dict,
     torch_tester: dict,
     device: torch.device,
+    inf_sample_size: int,
 ) -> float:
     test_path = (
         pmiss_path / f"{dataset_name}_{int(100*pmiss)}_nan.ts"
@@ -158,6 +161,7 @@ def test(
                         datasets_config,
                         torch_tester,
                         device,
+                        torch_tester["inf_sample_size"],
                     )
                     all_miss.append(acc)
                 else:

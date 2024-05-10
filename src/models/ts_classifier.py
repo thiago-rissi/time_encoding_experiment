@@ -48,6 +48,7 @@ class Transformer(nn.Module):
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
+        dropout: float,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -69,12 +70,16 @@ class Transformer(nn.Module):
             out_features=hidden_size,
         )
 
+        self.dropout = nn.Dropout(p=dropout)
+
     def forward(
         self, X: torch.Tensor, encoded_timestamps: torch.Tensor
     ) -> torch.Tensor:
         X = torch.cat([X, encoded_timestamps], dim=-1)
         X_encoded = self.encoder(X)
-        X_mean = torch.mean(X_encoded, dim=1)
+        X_encoded = self.dropout(X_encoded)
+        # X_mean = torch.mean(X_encoded, dim=1)
+        X_mean = X_encoded[:, -1]
         X_linear = self.linear(X_mean)
 
         return X_linear
@@ -172,10 +177,13 @@ class TSDecoder2(nn.Module):
     def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
         super().__init__()
 
+        self.dropout = torch.nn.Dropout(p=dropout)
+
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        y_hat = self.projective_linear(x)
+        out = self.dropout(x)
+        y_hat = self.projective_linear(out)
 
         return y_hat
 
@@ -253,6 +261,12 @@ class TSClassifier(nn.Module):
         self.decoder = TSDecoder(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
-        h_t = self.encoder(X, timestamps)
+
+        if self.training:
+            out = X + (2 * torch.rand_like(X) - 1) * 0.01
+        else:
+            out = X
+
+        h_t = self.encoder(out, timestamps)
         y_hat = self.decoder(h_t.squeeze(0))
         return y_hat

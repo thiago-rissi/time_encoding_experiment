@@ -74,6 +74,12 @@ class TorchDataset:
     ) -> None:
 
         self.statistics = statistics
+        self.device = device
+        self.dataset_path = dataset_path
+        self.dataset_name = dataset_name
+
+        self.normalize = normalize
+
         X, y = load_from_tsfile(str(dataset_path))
         metadata = get_dataset_metadata(dataset_name)
 
@@ -84,12 +90,6 @@ class TorchDataset:
         self.t_length = X.shape[2]
         self.encoding_order = metadata["class_values"]
 
-        if (statistics == None) and (normalize == True):
-            self.statistics = calculate_stats(X)
-
-        if normalize == True:
-            X = normalize(X, self.statistics)
-
         self.X = X
         self.y = encode_y(y, self.encoding_order, device).long()
         self.timestamps = torch.arange(self.t_length, device=device)
@@ -98,6 +98,39 @@ class TorchDataset:
 
     def __len__(self) -> int:
         return self.n_instances
+
+    def split_dataset(
+        self, split_ratio: float
+    ) -> tuple["TorchDataset", "TorchDataset"]:
+        train_dataset = self.__class__(
+            dataset_path=self.dataset_path,
+            dataset_name=self.dataset_name,
+            nan_strategy=self.nan_strategy,
+            device=self.device,
+            normalize=self.normalize,
+            statistics=self.statistics,
+        )
+
+        split_index = int(split_ratio * len(train_dataset))
+
+        train_dataset.X = train_dataset.X[:split_index]
+        train_dataset.y = train_dataset.y[:split_index]
+        train_dataset.n_instances = train_dataset.X.shape[0]
+
+        test_dataset = self.__class__(
+            dataset_path=self.dataset_path,
+            dataset_name=self.dataset_name,
+            nan_strategy=self.nan_strategy,
+            device=self.device,
+            normalize=self.normalize,
+            statistics=self.statistics,
+        )
+
+        test_dataset.X = test_dataset.X[split_index:]
+        test_dataset.y = test_dataset.y[split_index:]
+        test_dataset.n_instances = test_dataset.X.shape[0]
+
+        return train_dataset, test_dataset
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
