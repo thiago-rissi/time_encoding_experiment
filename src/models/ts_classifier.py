@@ -177,10 +177,13 @@ class TSDecoder2(nn.Module):
     def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
         super().__init__()
 
+        self.dropout = torch.nn.Dropout(p=dropout)
+
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        y_hat = self.projective_linear(x)
+        out = self.dropout(x)
+        y_hat = self.projective_linear(out)
 
         return y_hat
 
@@ -258,10 +261,11 @@ class TSClassifier(nn.Module):
         self.decoder = TSDecoder2(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
-        if self.training:
-            out = X + torch.randn_like(X) * 0.01
-        else:
-            out = X
+        # if self.training:
+        #     out = X + torch.rand_like(X) * 0.05
+        # else:
+        #     out = X
+        out = X + torch.rand_like(X) * 0.05
         h_t = self.encoder(out, timestamps)
         y_hat = self.decoder(h_t.squeeze(0))
         return y_hat

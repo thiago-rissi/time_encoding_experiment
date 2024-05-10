@@ -20,7 +20,7 @@ def load_model(
     )[-1]
 
     # model_path = pathlib.Path(
-    #     "data/models/TSClassifierTransformer/Heartbeat/model_120.pkl"
+    #     "data/models/TSClassifierTransformer/Heartbeat/model_20.pkl"
     # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model

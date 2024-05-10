@@ -5,16 +5,16 @@ TSClassifier:
     ts_encoding:
       encoder_class: Transformer
       hidden_size: 200
-      num_layers: 2
+      num_layers: 1
       batch_first: True
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
       time_encoding_size: 100
-      dropout: 0.0
+      dropout: 0.1
   decoder:
     hidden_size: 200
-    dropout: 0.0
+    dropout: 0.1
 
 TSAREncoderDecoder:
   torch: true
