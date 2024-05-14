@@ -10,7 +10,10 @@ datasets:
   - FingerMovements
   - Handwriting
 models:
-  - TSClassifier
+  # - TSClassifierTransformerTrue
+  # - TSClassifierTransformerFalse
+  # - TSClassifierRNNTrue
+  - TSClassifierRNNNone
   # - TSAREncoderDecoder
   # - TSClassifier
   # - RidgeClassifier
@@ -27,7 +30,7 @@ pmisses:
   - 0.9
 torch_tester:
   loss: CrossEntropyLoss
-  batch_size: 1
+  batch_size: 10
   base_path: data/outputs
   inf_sample_size: 10
 general_tester:

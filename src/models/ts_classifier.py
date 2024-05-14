@@ -78,73 +78,10 @@ class Transformer(nn.Module):
         X = torch.cat([X, encoded_timestamps], dim=-1)
         X_encoded = self.encoder(X)
         X_encoded = self.dropout(X_encoded)
-        # X_mean = torch.mean(X_encoded, dim=1)
         X_mean = X_encoded[:, -1]
         X_linear = self.linear(X_mean)
 
         return X_linear
-
-
-# class TSEncoder(nn.Module):
-#     def __init__(
-#         self,
-#         time_encoding: dict,
-#         ts_encoding: dict,
-#         num_features: int,
-#         t_length: int,
-#         **kwargs,
-#     ) -> None:
-
-#         super().__init__()
-#         self.time_encoder: nn.Module | None = None
-
-#         self.time_encoding_size = 0
-#         if time_encoding is not None:
-#             time_encoding_class = getattr(
-#                 sys.modules[__name__], time_encoding["time_encoding_class"]
-#             )
-#             self.time_encoding_size = time_encoding["time_encoding_size"]
-
-#         if self.time_encoding_size > 0:
-#             self.time_encoder = time_encoding_class(**time_encoding)
-
-#         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
-
-#         self.encoder_wrapper = encoder_class(
-#             input_size=num_features + self.time_encoding_size,
-#             t_length=t_length,
-#             **ts_encoding,
-#         )
-
-#     def encode_timestamps(
-#         self, X: torch.Tensor, timestamps: torch.Tensor
-#     ) -> torch.Tensor:
-
-#         encoded_timestamps = []
-#         for i in range(X.shape[0]):
-#             timestamp = timestamps[i]
-#             t_inference = timestamp[-1] + 1
-#             x_rel_timestamp = torch.clone(timestamp)
-#             x_rel_timestamp = x_rel_timestamp.roll(-1)
-#             x_rel_timestamp[-1] = t_inference
-#             encoded_timestamps.append(
-#                 self.time_encoder(
-#                     (x_rel_timestamp - t_inference).unsqueeze(-1),
-#                 )
-#             )
-
-#         encoded_timestamps = torch.stack(encoded_timestamps, dim=0)
-#         X_encoding = torch.concat([X, encoded_timestamps], dim=-1)
-#         return X_encoding, encoded_timestamps
-
-#     def forward(self, X: torch.Tensor, timestamps: torch.Tensor) -> torch.Tensor:
-#         X = X.swapaxes(1, 2)
-#         if self.time_encoding_size > 0:
-#             X, encoded_timestamps = self.encode_timestamps(X, timestamps)
-
-#         X_encoded = self.encoder_wrapper(X)
-
-#         return X_encoded
 
 
 class TSDecoder(nn.Module):
@@ -177,12 +114,13 @@ class TSDecoder2(nn.Module):
     def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
         super().__init__()
 
-        self.dropout = torch.nn.Dropout(p=dropout)
-
+        self.internal_linear = nn.Linear(hidden_size, hidden_size)
+        self.relu = nn.ReLU()
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = self.dropout(x)
+        out = self.internal_linear(x)
+        out = self.relu(out)
         y_hat = self.projective_linear(out)
 
         return y_hat
@@ -201,28 +139,31 @@ class TSEncoder(nn.Module):
         ts_encoding: dict,
         input_size: int,
         t_length: int,
-        # hidden_size: int,
-        # num_layers: int,
-        # batch_first: bool,
-        # dropout: float,
         **kwargs,
     ) -> None:
 
         super().__init__()
         self.time_encoder: nn.Module | None = None
 
-        if time_encoding is not None:
+        if time_encoding["time_encoding_size"] > 0:
             if ts_encoding["encoder_class"] == "Transformer":
                 time_encoding["time_encoding_size"] = set_dynamic_size(
                     nheads=4, T=30, input_size=input_size
                 )
 
             self.time_encoder = PositionalEncoding(**time_encoding)
+            time_encoding_size = self.time_encoder.hidden_size
+        else:
+            time_encoding_size = 1
+            if ts_encoding["encoder_class"] == "Transformer":
+                time_encoding_size = set_dynamic_size(
+                    nheads=4, T=30, input_size=input_size
+                )
 
         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
         self.encoder_wrapper = encoder_class(
             input_size=input_size,
-            time_encoding_size=self.time_encoder.hidden_size,
+            time_encoding_size=time_encoding_size,
             t_length=t_length,
             **ts_encoding,
         )
@@ -237,9 +178,11 @@ class TSEncoder(nn.Module):
 
         X = X.swapaxes(1, 2)
         if self.time_encoder is not None:
-            encoded_timestamps = self.time_encoder(timestamps)
+            timestamps = self.time_encoder(timestamps)
+        else:
+            timestamps = timestamps.unsqueeze(-1)
 
-        h_t = self.encoder_wrapper(X=X, encoded_timestamps=encoded_timestamps)
+        h_t = self.encoder_wrapper(X=X, encoded_timestamps=timestamps)
 
         return h_t
 
@@ -258,7 +201,7 @@ class TSClassifier(nn.Module):
         super().__init__()
 
         self.encoder = TSEncoder(input_size=num_features, t_length=t_length, **encoder)
-        self.decoder = TSDecoder(num_classes=num_classes, **decoder)
+        self.decoder = TSDecoder2(num_classes=num_classes, **decoder)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
 

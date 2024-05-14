@@ -10,10 +10,11 @@ TSClassifier:
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
-      time_encoding_size: 200
+      time_encoding_size: 0
+      relative_encoding: None
       dropout: 0.1
   decoder:
-    hidden_size: 200
+    hidden_size: 400
     dropout: 0.1
 
 TSAREncoderDecoder:

@@ -91,6 +91,8 @@ class TorchTrainer:
                 X.to(device)
                 y.to(device)
                 y_hat = self.model(X, timestamps)
+                if len(y_hat.shape) == 1:
+                    y_hat = y_hat.unsqueeze(0)
                 loss = self.loss_func(y_hat, y)
                 losses.append(loss.item())
         return np.mean(losses)
@@ -135,7 +137,7 @@ class TorchTrainer:
             self.model.parameters(),
             lr=float(lr),
         )
-
+        patience_init = patience
         best_loss = torch.inf
         for epoch in range(n_epochs):
             loss = self.train_epoch(
@@ -154,6 +156,7 @@ class TorchTrainer:
                         self.model, pathlib.Path(save_path) / f"model_{epoch}_best.pkl"
                     )
                     best_loss = loss
+                    patience = patience_init
                 else:
                     patience -= 1
 

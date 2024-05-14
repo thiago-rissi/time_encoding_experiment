@@ -11,6 +11,7 @@ from sktime.classification.deep_learning.resnet import ResNetClassifier
 from sktime.classification.interval_based import CanonicalIntervalForest
 from sktime.classification.hybrid import HIVECOTEV2
 import datetime
+import yaml
 
 
 def torch_train_step(
@@ -23,10 +24,9 @@ def torch_train_step(
     device: torch.device,
 ) -> None:
 
-    model_name = model_name + config["encoder"]["ts_encoding"]["encoder_class"]
-    save_path = (
-        pathlib.Path(torch_trainer["classification_training"]["base_path"]) / model_name
-    ) / dataset_name
+    encoder_class = config["encoder"]["ts_encoding"]["encoder_class"]
+    relative_encoding = config["encoder"]["time_encoding"]["relative_encoding"]
+    model_name = model_name + encoder_class + str(relative_encoding).capitalize()
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
@@ -34,6 +34,7 @@ def torch_train_step(
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
+        relative_encoding=relative_encoding,
     )
 
     model = TSClassifier(
@@ -49,6 +50,16 @@ def torch_train_step(
     ) / dataset_name
 
     save_path.mkdir(parents=True, exist_ok=True)
+
+    train_yml = save_path.parent / "train.yml"
+    model_yml = save_path.parent / "model.yml"
+
+    with open(train_yml, "w") as f:
+        yaml.dump(torch_trainer, f)
+
+    with open(model_yml, "w") as f:
+        yaml.dump(config, f)
+
     i_time = datetime.datetime.now()
     print(f"Training Classification: {model_name}")
     trainer.train(

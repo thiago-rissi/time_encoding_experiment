@@ -1,7 +1,7 @@
 import pathlib
 import torch
 import sys
-
+import yaml
 import uniplot
 from dataset.utils import *
 from dataset.datasets import *
@@ -18,7 +18,7 @@ def load_model(
         list(pathlib.Path(model_basepath).rglob("*best.pkl")),
         key=lambda x: int(x.stem.split("_")[-2]),
     )[-1]
-
+    # model_path = list(pathlib.Path(model_basepath).rglob("*.pkl"))[-1]
     # model_path = pathlib.Path(
     #     "data/models/TSClassifierTransformer/EthanolConcentration/model_20.pkl"
     # )
@@ -47,6 +47,7 @@ def torch_test_step(
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
+        relative_encoding=config["encoder"]["time_encoding"]["relative_encoding"],
     )
 
     # ar_model = TSAREncoderDecoder(input_size=dataset.n_variables, **config)
@@ -58,7 +59,6 @@ def torch_test_step(
         **config,
     )
 
-    model_name = model_name + config["encoder"]["ts_encoding"]["encoder_class"]
     model = load_model(
         model_basepath=os.path.join("data/models", model_name, dataset_name),
         model=model,
@@ -140,8 +140,13 @@ def test(
     base_path = pathlib.Path("data/feature")
     all_results = {}
     for model_name in models:
-        config = models_config[model_name]
         print(f"Testing model: {model_name}")
+
+        if "TSClassifier" in model_name:
+            with open(f"data/models/{model_name}/model.yml", "r") as f:
+                config = yaml.safe_load(f)
+        else:
+            config = models_config[model_name]
 
         for dataset_name in datasets:
             print(f"---> Dataset: {dataset_name}")
@@ -165,6 +170,7 @@ def test(
                     )
                     all_miss.append(acc)
                 else:
+
                     general_step_tester(
                         pmiss_path,
                         dataset_name,

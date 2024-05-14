@@ -6,7 +6,7 @@ import numpy as np
 from typing import Any
 
 
-def normalize(ts: torch.Tensor, stats: list[tuple[float, float]]) -> torch.Tensor:
+def normalize_ts(ts: torch.Tensor, stats: list[tuple[float, float]]) -> torch.Tensor:
 
     for j in range(ts.shape[1]):
         ts_ = ts[:, j, :]

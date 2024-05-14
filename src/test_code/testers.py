@@ -30,7 +30,9 @@ class TorchTester:
     ) -> tuple[torch.Tensor, float | torch.Tensor]:
         self.model.eval()
         y_hat = self.model(X, timestamps)
-        loss = self.loss_func(y_hat, y.squeeze())
+        if len(y_hat.shape) == 1:
+            y_hat = y_hat.unsqueeze(0)
+        loss = self.loss_func(y_hat, y)
 
         return y_hat, loss
 
@@ -73,7 +75,7 @@ class TorchTester:
 
         acc = accuracy_score(y, y_hat)
         print(acc)
-        results = pl.DataFrame({"y": y.numpy(), "y_hat": y_hat.numpy()})
+        results = pl.DataFrame({"y": y.numpy(), "y_hat": (y_hat.squeeze()).numpy()})
 
         s = pathlib.Path(save_path)
         s.parent.mkdir(exist_ok=True, parents=True)

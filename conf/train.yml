@@ -20,12 +20,12 @@ models:
 torch_trainer:
   classification_training:
     loss: CrossEntropyLoss
-    n_epochs: 500
-    batch_size: 32
+    n_epochs: 1000
+    batch_size: 10
     early_stop: true
     tol: 1e-3
     lr: 1e-3
-    patience: 50
+    patience: 200
     snapshot_interval: 10
     base_path: data/models
 
