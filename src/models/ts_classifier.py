@@ -48,6 +48,7 @@ class Transformer(nn.Module):
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
+        nhead: int,
         dropout: float,
         **kwargs,
     ) -> None:
@@ -58,7 +59,7 @@ class Transformer(nn.Module):
         encoder_layer = TransformerEncoderLayer(
             batch_first=batch_first,
             d_model=d_model,
-            nhead=4,
+            nhead=nhead,
         )
         self.encoder = TransformerEncoder(
             encoder_layer=encoder_layer,
@@ -150,21 +151,23 @@ class TSEncoder(nn.Module):
                 time_encoding["time_encoding_size"] = set_dynamic_size(
                     nheads=4, T=30, input_size=input_size
                 )
+            nhead = 4
 
             self.time_encoder = PositionalEncoding(**time_encoding)
             time_encoding_size = self.time_encoder.hidden_size
         else:
             time_encoding_size = 1
-            if ts_encoding["encoder_class"] == "Transformer":
-                time_encoding_size = set_dynamic_size(
-                    nheads=4, T=30, input_size=input_size
-                )
+            # if ts_encoding["encoder_class"] == "Transformer":
+            nhead = find_minimun_divisor(
+                threshold=4, dividend=time_encoding_size + input_size
+            )
 
         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
         self.encoder_wrapper = encoder_class(
             input_size=input_size,
             time_encoding_size=time_encoding_size,
             t_length=t_length,
+            nhead=nhead,
             **ts_encoding,
         )
 
@@ -213,3 +216,12 @@ class TSClassifier(nn.Module):
         h_t = self.encoder(out, timestamps)
         y_hat = self.decoder(h_t.squeeze(0))
         return y_hat
+
+
+def find_minimun_divisor(threshold: int, dividend: int) -> int:
+    md = threshold
+    if dividend <= threshold:
+        return dividend
+    while dividend % md != 0:
+        md += 1
+    return md
