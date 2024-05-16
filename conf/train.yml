@@ -10,8 +10,14 @@ datasets:
   - FingerMovements
   - Handwriting
 models:
-  - TSClassifier
-  # - TSAREncoderDecoder
+  - TSCRNNRel
+  - TSCRNNAbs
+  - TSCRNNTimestamps
+  - TSCRNN
+  - TSCTransformerRel
+  - TSCTransformerAbs
+  - TSCTransformerTimestamps
+  - TSCTransformer
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2

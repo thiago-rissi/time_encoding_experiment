@@ -24,14 +24,7 @@ def torch_train_step(
     device: torch.device,
 ) -> None:
 
-    encoder_class = config["encoder"]["ts_encoding"]["encoder_class"]
-    relative_encoding = config["encoder"]["time_encoding"]["relative_encoding"]
-    timestamps_only = config["encoder"]["time_encoding"]["timestamps_only"]
-
-    if timestamps_only:
-        model_name = model_name + encoder_class + "None"
-    else:
-        model_name = model_name + encoder_class + str(relative_encoding).capitalize()
+    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
@@ -39,7 +32,7 @@ def torch_train_step(
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
-        relative_encoding=relative_encoding,
+        time_encoding_strategy=time_encoding_strategy,
     )
 
     model = TSClassifier(
@@ -126,7 +119,6 @@ def train(
 ):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device = torch.device("cpu")
     base_path = pathlib.Path("data/feature")
     for model_name in models:
         config = models_config[model_name]

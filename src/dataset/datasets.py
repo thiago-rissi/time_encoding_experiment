@@ -69,7 +69,7 @@ class TorchDataset:
         dataset_name: str,
         nan_strategy: str,
         device: torch.device,
-        relative_encoding: bool,
+        time_encoding_strategy: str,
         normalize: bool = False,
         statistics: dict | None = None,
     ) -> None:
@@ -85,8 +85,6 @@ class TorchDataset:
         metadata = get_dataset_metadata(dataset_name)
 
         X = torch.tensor(X, device=device, dtype=torch.float32)
-        # stats = calculate_stats(X)
-        # X = normalize_ts(X, stats)
 
         self.n_instances = X.shape[0]
         self.n_variables = X.shape[1]
@@ -98,7 +96,7 @@ class TorchDataset:
         self.timestamps = torch.arange(self.t_length, device=device)
         self.num_classes = len(self.encoding_order)
         self.nan_strategy = nan_strategy
-        self.relative_encoding = relative_encoding
+        self.time_encoding_strategy = time_encoding_strategy
 
     def __len__(self) -> int:
         return self.n_instances
@@ -113,7 +111,7 @@ class TorchDataset:
             device=self.device,
             normalize=self.normalize,
             statistics=self.statistics,
-            relative_encoding=self.relative_encoding,
+            time_encoding_strategy=self.time_encoding_strategy,
         )
 
         split_index = int(split_ratio * len(train_dataset))
@@ -129,7 +127,7 @@ class TorchDataset:
             device=self.device,
             normalize=self.normalize,
             statistics=self.statistics,
-            relative_encoding=self.relative_encoding,
+            time_encoding_strategy=self.time_encoding_strategy,
         )
 
         test_dataset.X = test_dataset.X[split_index:]
@@ -140,13 +138,12 @@ class TorchDataset:
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
-        if self.relative_encoding:
+        t_inf = 0.0
+        if self.time_encoding_strategy == "relative":
             t_inf = sample_random_t_inference(
                 min_timestamp=0.0,
                 max_timestamp=self.timestamps.max().item(),
             ).to(self.X.device)
-        else:
-            t_inf = 0.0
 
         x_i = self.X[idx]
         y_i = self.y[idx]
