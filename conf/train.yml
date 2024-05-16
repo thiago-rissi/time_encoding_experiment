@@ -1,10 +1,10 @@
 datasets:
-  # - ERing
-  # - Epilepsy
-  # - Heartbeat
-  # - UWaveGestureLibrary
-  # - ArticularyWordRecognition
-  # - EthanolConcentration
+  - ERing
+  - Epilepsy
+  - Heartbeat
+  - UWaveGestureLibrary
+  - ArticularyWordRecognition
+  - EthanolConcentration
   - Libras
   - AsphaltPavementTypeCoordinates
   - FingerMovements

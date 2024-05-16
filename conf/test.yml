@@ -13,7 +13,7 @@ models:
   # - TSClassifierTransformerTrue
   # - TSClassifierTransformerFalse
   # - TSClassifierRNNTrue
-  # - TSClassifierRNNNone
+  - TSClassifierRNNNone
   - TSClassifierTransformerNone
   # - TSAREncoderDecoder
   # - TSClassifier

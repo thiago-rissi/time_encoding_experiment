@@ -48,7 +48,6 @@ class Transformer(nn.Module):
         hidden_size: int,
         num_layers: int,
         batch_first: bool,
-        nhead: int,
         dropout: float,
         **kwargs,
     ) -> None:
@@ -59,7 +58,7 @@ class Transformer(nn.Module):
         encoder_layer = TransformerEncoderLayer(
             batch_first=batch_first,
             d_model=d_model,
-            nhead=nhead,
+            nhead=4,
         )
         self.encoder = TransformerEncoder(
             encoder_layer=encoder_layer,
@@ -146,28 +145,23 @@ class TSEncoder(nn.Module):
         super().__init__()
         self.time_encoder: nn.Module | None = None
 
-        if time_encoding["time_encoding_size"] > 0:
-            if ts_encoding["encoder_class"] == "Transformer":
-                time_encoding["time_encoding_size"] = set_dynamic_size(
-                    nheads=4, T=30, input_size=input_size
-                )
-            nhead = 4
-
-            self.time_encoder = PositionalEncoding(**time_encoding)
-            time_encoding_size = self.time_encoder.hidden_size
-        else:
-            time_encoding_size = 1
-            # if ts_encoding["encoder_class"] == "Transformer":
-            nhead = find_minimun_divisor(
-                threshold=4, dividend=time_encoding_size + input_size
+        if ts_encoding["encoder_class"] == "Transformer":
+            time_encoding["time_encoding_size"] = set_dynamic_size(
+                nheads=4, T=30, input_size=input_size
             )
+
+        self.unsqueeze_timestamps = False
+        if time_encoding["timestamps_only"]:
+            self.time_encoder = nn.Linear(1, time_encoding["time_encoding_size"])
+            self.unsqueeze_timestamps = True
+        else:
+            self.time_encoder = PositionalEncoding(**time_encoding)
 
         encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
         self.encoder_wrapper = encoder_class(
             input_size=input_size,
-            time_encoding_size=time_encoding_size,
+            time_encoding_size=time_encoding["time_encoding_size"],
             t_length=t_length,
-            nhead=nhead,
             **ts_encoding,
         )
 
@@ -181,11 +175,11 @@ class TSEncoder(nn.Module):
 
         X = X.swapaxes(1, 2)
         if self.time_encoder is not None:
-            timestamps = self.time_encoder(timestamps)
-        else:
-            timestamps = timestamps.unsqueeze(-1)
+            if self.unsqueeze_timestamps:
+                timestamps = timestamps.unsqueeze(-1)
+            encoded_timestamps = self.time_encoder(timestamps)
 
-        h_t = self.encoder_wrapper(X=X, encoded_timestamps=timestamps)
+        h_t = self.encoder_wrapper(X=X, encoded_timestamps=encoded_timestamps)
 
         return h_t
 

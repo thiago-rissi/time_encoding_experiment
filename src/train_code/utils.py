@@ -26,11 +26,12 @@ def torch_train_step(
 
     encoder_class = config["encoder"]["ts_encoding"]["encoder_class"]
     relative_encoding = config["encoder"]["time_encoding"]["relative_encoding"]
-    time_encoding_size = config["encoder"]["time_encoding"]["time_encoding_size"]
-    if time_encoding_size > 0:
-        model_name = model_name + encoder_class + str(relative_encoding).capitalize()
-    else:
+    timestamps_only = config["encoder"]["time_encoding"]["timestamps_only"]
+
+    if timestamps_only:
         model_name = model_name + encoder_class + "None"
+    else:
+        model_name = model_name + encoder_class + str(relative_encoding).capitalize()
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
