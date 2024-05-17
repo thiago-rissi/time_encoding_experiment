@@ -42,15 +42,16 @@ def torch_test_step(
         if config["test_nan"] and pmiss != 0.0
         else pmiss_path / f"{dataset_name}_{int(100*pmiss)}.ts"
     )
+
+    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+
     dataset = TorchDataset(
         dataset_path=test_path,
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
-        relative_encoding=config["encoder"]["time_encoding"]["relative_encoding"],
+        time_encoding_strategy=time_encoding_strategy,
     )
-
-    # ar_model = TSAREncoderDecoder(input_size=dataset.n_variables, **config)
 
     model = TSClassifier(
         num_classes=dataset.num_classes,
