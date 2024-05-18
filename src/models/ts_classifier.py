@@ -169,8 +169,10 @@ class TSEncoder(nn.Module):
         X = X.swapaxes(1, 2)
 
         if self.time_encoder is not None:
+            timestamps = min_max_norm(timestamps)
             if self.unsqueeze_timestamps:
                 timestamps = timestamps.unsqueeze(-1)
+
             encoded_timestamps = self.time_encoder(timestamps)
             X = torch.cat([X, encoded_timestamps], dim=-1)
         else:
@@ -209,3 +211,8 @@ def find_minimun_divisor(threshold: int, dividend: int) -> int:
     while dividend % md != 0:
         md += 1
     return md
+
+
+def min_max_norm(x: torch.Tensor) -> torch.Tensor:
+    x_norm = (x - x.min()) / (x.max() - x.min())
+    return x_norm

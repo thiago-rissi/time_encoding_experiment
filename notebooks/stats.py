@@ -33,7 +33,7 @@ def calculate_metrics(
     for model in models:
         metric_list = []
         for test, metrics in results.items():
-            if model in test:
+            if model == test.split("_")[0]:
                 metric_list.append(metrics)
         metric_array = np.stack(metric_list, axis=0)
         model_mean[model] = np.mean(metric_array, axis=0)
