@@ -1,7 +1,7 @@
 import pathlib
 import torch
 import sys
-from models.ts_classifier import TSClassifier
+from models.ts_classifier import TSClassifier  # , TSAREncoderDecoder
 from models.resnet import ResNet50
 from train_code.trainers import *
 from dataset.utils import *
@@ -11,6 +11,7 @@ from sktime.classification.deep_learning.resnet import ResNetClassifier
 from sktime.classification.interval_based import CanonicalIntervalForest
 from sktime.classification.hybrid import HIVECOTEV2
 import datetime
+import yaml
 
 
 def torch_train_step(
@@ -22,26 +23,46 @@ def torch_train_step(
     torch_trainer: dict,
     device: torch.device,
 ) -> None:
+
+    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+
+    class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
         dataset_path=dataset_path / f"{dataset_name}_train.ts",
         dataset_name=dataset_name,
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
+        time_encoding_strategy=time_encoding_strategy,
     )
-    model_class = getattr(sys.modules[__name__], model_name)
-    model = model_class(
+
+    model = TSClassifier(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
         **config,
     )
 
-    trainer = TorchTrainer(model=model, **torch_trainer)
-    save_path = (pathlib.Path(torch_trainer["base_path"]) / model_name) / dataset_name
+    trainer = TorchTrainer(model=model, **class_trainer_config)
+    save_path = (
+        pathlib.Path(class_trainer_config["base_path"]) / model_name
+    ) / dataset_name
 
     save_path.mkdir(parents=True, exist_ok=True)
+
+    train_yml = save_path.parent / "train.yml"
+    model_yml = save_path.parent / "model.yml"
+
+    with open(train_yml, "w") as f:
+        yaml.dump(torch_trainer, f)
+
+    with open(model_yml, "w") as f:
+        yaml.dump(config, f)
+
     i_time = datetime.datetime.now()
-    trainer.train(dataset=dataset, device=device, save_path=save_path, **torch_trainer)
+    print(f"Training Classification: {model_name}")
+    trainer.train(
+        dataset=dataset, device=device, save_path=save_path, **class_trainer_config
+    )
     f_time = datetime.datetime.now()
 
     print(f"Training duration: {f_time - i_time}")

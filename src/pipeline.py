@@ -3,7 +3,8 @@ import pathlib
 import yaml
 import sys
 
-from train_code.utils import train
+from test import main_test
+from train import main_train
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:
@@ -30,27 +31,24 @@ def parse_args(args: list[str]) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main_train(args: list[str] | None = None, path: str | None = None):
+def main(args: list[str]):
     """Receives args from terminal.
 
     Receives args from terminal and performs training accordingly.
 
     """
-    if path == None:
-        args_ = parse_args(args)
-        path = pathlib.Path(args_.config)
+
+    args_ = parse_args(args)
+    path = pathlib.Path(args_.config)
 
     with open(path, "r") as f:
         config = yaml.safe_load(f)
 
-    with open(pathlib.Path("src/models/metadata.yml"), "r") as f:
-        models_config = yaml.safe_load(f)
-
-    with open(pathlib.Path("conf/pre_process.yml"), "r") as f:
-        datasets_config = yaml.safe_load(f)
-
-    train(models_config=models_config, datasets_config=datasets_config, **config)
+    for module in config["modules"]:
+        node_func = getattr(sys.modules[__name__], f"main_{module}")
+        path = f"conf/{module}.yml"
+        node_func(path=path)
 
 
 if __name__ == "__main__":
-    main_train(sys.argv[1:])
+    main(sys.argv[1:])

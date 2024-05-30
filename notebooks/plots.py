@@ -51,4 +51,3 @@ def plot_metric(
     ax.set_title(title)
     ax.grid()
     ax.legend()
-    plt.show()

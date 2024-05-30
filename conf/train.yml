@@ -10,24 +10,33 @@ datasets:
   - FingerMovements
   - Handwriting
 models:
-  # - TSClassifier
-  - RidgeClassifier
+  # - TSCRNNRel
+  # - TSCRNNAbs
+  # - TSCRNNTimestamps
+  - TSCRNN
+  # - TSCTransformerRel
+  # - TSCTransformerAbs
+  # - TSCTransformerTimestamps
+  # - TSCTransformer
+  # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
   
 torch_trainer:
-  loss: CrossEntropyLoss
-  n_epochs: 500
-  batch_size: 8
-  early_stop: true
-  tol: 1e-4
-  lr: 1e-3
-  snapshot_interval: 10
-  base_path: data/models
+  classification_training:
+    loss: CrossEntropyLoss
+    n_epochs: 1000
+    batch_size: 10
+    early_stop: true
+    tol: 1e-3
+    lr: 1e-3
+    patience: 200
+    snapshot_interval: 10
+    base_path: data/models
 
 general_trainer:
   base_path: data/models
-  add_encoding: true
+  add_encoding: false
   time_encoding_size: 50
   dropout: 0.0

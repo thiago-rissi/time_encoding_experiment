@@ -30,6 +30,8 @@ class TorchTester:
     ) -> tuple[torch.Tensor, float | torch.Tensor]:
         self.model.eval()
         y_hat = self.model(X, timestamps)
+        if len(y_hat.shape) == 1:
+            y_hat = y_hat.unsqueeze(0)
         loss = self.loss_func(y_hat, y)
 
         return y_hat, loss
@@ -37,12 +39,12 @@ class TorchTester:
     def test(
         self,
         dataset: TorchDataset,
-        batch_size: int,
         device: torch.device,
         save_path: str,
+        inf_sample_size: int,
         num_workers: int = 0,
         **kwargs,
-    ) -> None:
+    ) -> float:
         device_ = torch.device(device)
         self.model.to(device_)
 
@@ -53,18 +55,29 @@ class TorchTester:
             shuffle=False,
             drop_last=False,
         )
-        ys = []
-        ys_hat = []
-        for i, (X, y, timestamps) in enumerate((pbar := tqdm(test_dataloader))):
-            with torch.no_grad():
-                y_hat, loss = self.predict(X, y, timestamps)
-                y_hat = np.argmax(y_hat.cpu(), axis=1)
-                y = y.cpu()
-                ys.append(y)
-                ys_hat.append(y_hat)
+        all_infs = []
+        for inf_sample in range(inf_sample_size):
+            ys = []
+            ys_hat = []
+            for i, (X, y, timestamps) in enumerate((pbar := tqdm(test_dataloader))):
+                with torch.no_grad():
+                    y_hat, loss = self.predict(X, y, timestamps)
+                    y = y.cpu()
+                    ys.append(y)
+                    ys_hat.append(y_hat)
 
-        y = np.concatenate(ys)
-        y_hat = np.concatenate(ys_hat)
-        print(accuracy_score(y, y_hat))
-        results = pl.DataFrame({"y": y, "y_hat": y_hat})
-        results.write_parquet(pathlib.Path(save_path))
+            y = torch.cat(ys)
+            y_hat = torch.stack(ys_hat)
+            all_infs.append(y_hat)
+        y_hat = torch.mean(torch.stack(all_infs), dim=0)
+
+        y_hat = torch.argmax(y_hat.cpu(), dim=-1)
+
+        acc = accuracy_score(y, y_hat)
+        print(acc)
+        results = pl.DataFrame({"y": y.numpy(), "y_hat": (y_hat.squeeze()).numpy()})
+
+        s = pathlib.Path(save_path)
+        s.parent.mkdir(exist_ok=True, parents=True)
+        results.write_parquet(s)
+        return acc
