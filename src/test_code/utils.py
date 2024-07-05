@@ -121,11 +121,13 @@ def general_step_tester(
             model = pickle.load(f)
 
     y_hat = model.predict(np.nan_to_num(dataset.X))
-    print(accuracy_score(dataset.y, y_hat))
+    acc = accuracy_score(dataset.y, y_hat)
+    print(acc)
     results = pl.DataFrame({"y": dataset.y, "y_hat": y_hat})
     save_path = save_path / f"{model_name}_{dataset_name}_{int(100*pmiss)}.parquet"
 
     results.write_parquet(save_path)
+    return acc
 
 
 def test(
@@ -171,8 +173,7 @@ def test(
                     )
                     all_miss.append(acc)
                 else:
-
-                    general_step_tester(
+                    acc = general_step_tester(
                         pmiss_path,
                         dataset_name,
                         pmiss,
@@ -180,6 +181,7 @@ def test(
                         config,
                         general_tester,
                     )
+                    all_miss.append(acc)
 
             uniplot.plot(
                 xs=[pmisses],

@@ -5,6 +5,7 @@ import sys
 
 from test import main_test
 from train import main_train
+from pre_process import main_pre_process
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:
