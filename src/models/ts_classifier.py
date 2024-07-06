@@ -135,21 +135,21 @@ class TSEncoder(nn.Module):
         super().__init__()
         self.time_encoder: nn.Module | None = None
         self.unsqueeze_timestamps = False
-        time_encoding_size = input_size - num_features
-        time_encoding["time_encoding_size"] = time_encoding_size
-
+        self.time_encoding_size = time_encoding["time_encoding_size"]
         self.time_encoding_strategy = time_encoding["strategy"]
-        if (self.time_encoding_strategy == "relative") or (
-            self.time_encoding_strategy == "absolute"
-        ):
+        self.time_encoding_class = time_encoding["time_encoding_class"]
+        self.projection = nn.Linear(num_features + self.time_encoding_size, input_size)
+
+        if self.time_encoding_class == "PositionalEncoding":
             self.time_encoder = PositionalEncoding(**time_encoding)
 
-        elif self.time_encoding_strategy == "timestamps":
-            self.time_encoder = nn.Linear(1, time_encoding_size)
+        elif self.time_encoding_class == "Linear":
+            self.time_encoder = nn.Linear(1, self.time_encoding_size)
             self.unsqueeze_timestamps = True
 
-        elif self.time_encoding_strategy == "none":
-            self.linear = nn.Linear(num_features, input_size)
+        elif self.time_encoding_class == "Time2Vec":
+            self.time_encoder = Time2Vec(1, self.time_encoding_size)
+            self.unsqueeze_timestamps = True
 
         else:
             Exception("Invalid time encoding strategy")
@@ -175,8 +175,8 @@ class TSEncoder(nn.Module):
 
             encoded_timestamps = self.time_encoder(timestamps)
             X = torch.cat([X, encoded_timestamps], dim=-1)
-        else:
-            X = self.linear(X)
+
+        X = self.projection(X)
 
         h_t = self.encoder_wrapper(X=X)
 

@@ -10,7 +10,28 @@ TSCRNNRel:
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
+      time_encoding_size: 100
       strategy: relative
+      dropout: 0.1
+    input_size: 200
+  decoder:
+    hidden_size: 400
+    dropout: 0.1
+
+TSCRNNTime2Vec:
+  torch: true
+  test_nan: true
+  encoder: 
+    ts_encoding:
+      encoder_class: RNN
+      hidden_size: 400
+      num_layers: 1
+      batch_first: True
+      dropout: 0.1
+    time_encoding:
+      time_encoding_class: Time2Vec
+      time_encoding_size: 100
+      strategy: t2v
       dropout: 0.1
     input_size: 200
   decoder:
@@ -29,6 +50,7 @@ TSCRNNAbs:
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
+      time_encoding_size: 100
       strategy: absolute
       dropout: 0.1
     input_size: 200
@@ -47,7 +69,8 @@ TSCRNNTimestamps:
       batch_first: True
       dropout: 0.1
     time_encoding:
-      time_encoding_class: PositionalEncoding
+      time_encoding_class: Linear
+      time_encoding_size: 100
       strategy: timestamps
       dropout: 0.1
     input_size: 200
@@ -66,7 +89,8 @@ TSCRNN:
       batch_first: True
       dropout: 0.1
     time_encoding:
-      time_encoding_class: PositionalEncoding      
+      time_encoding_class: null   
+      time_encoding_size: 0 
       strategy: none
       dropout: 0.1
     input_size: 200
@@ -86,6 +110,7 @@ TSCTransformerRel:
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
+      time_encoding_size: 100
       strategy: relative
       dropout: 0.1
     input_size: 200
@@ -105,6 +130,7 @@ TSCTransformerAbs:
       dropout: 0.1
     time_encoding:
       time_encoding_class: PositionalEncoding
+      time_encoding_size: 100
       strategy: absolute
       dropout: 0.1
     input_size: 200
@@ -123,7 +149,8 @@ TSCTransformerTimestamps:
       batch_first: True
       dropout: 0.1
     time_encoding:
-      time_encoding_class: PositionalEncoding
+      time_encoding_class: Linear
+      time_encoding_size: 100
       strategy: timestamps
       dropout: 0.1
     input_size: 200
@@ -142,7 +169,28 @@ TSCTransformer:
       batch_first: True
       dropout: 0.1
     time_encoding:
-      time_encoding_class: PositionalEncoding
+      time_encoding_class: Time2Vec
+      time_encoding_size: 0
+      strategy: t2v
+      dropout: 0.1
+    input_size: 200
+  decoder:
+    hidden_size: 400
+    dropout: 0.1
+
+TSCTransformer:
+  torch: true
+  test_nan: true
+  encoder: 
+    ts_encoding:
+      encoder_class: Transformer
+      hidden_size: 400
+      num_layers: 1
+      batch_first: True
+      dropout: 0.1
+    time_encoding:
+      time_encoding_class: null
+      time_encoding_size: 0
       strategy: none
       dropout: 0.1
     input_size: 200
@@ -159,7 +207,7 @@ TSAREncoderDecoder:
   batch_first: True
   dropout: 0.1
   time_encoding:
-    time_encoding_size: 300
+    time_time_: 300
     dropout: 0.0
   decoder:
     hidden_size: 800

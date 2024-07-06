@@ -13,11 +13,13 @@ models:
   # - TSCRNNRel
   # - TSCRNNAbs
   # - TSCRNNTimestamps
-  - TSCRNN
+  # - TSCRNN
+  - TSCRNNTime2Vec
   # - TSCTransformerRel
   # - TSCTransformerAbs
   # - TSCTransformerTimestamps
   # - TSCTransformer
+  - TSCTransformerTime2Vec
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
@@ -27,7 +29,7 @@ torch_trainer:
   classification_training:
     loss: CrossEntropyLoss
     n_epochs: 1000
-    batch_size: 10
+    batch_size: 16
     early_stop: true
     tol: 1e-3
     lr: 1e-3
