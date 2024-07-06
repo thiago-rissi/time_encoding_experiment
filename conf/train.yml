@@ -13,11 +13,13 @@ models:
   # - TSCRNNRel
   # - TSCRNNAbs
   # - TSCRNNTimestamps
-  - TSCRNN
+  # - TSCRNN
+  - TSCRNNTime2Vec
   # - TSCTransformerRel
-  - TSCTransformerAbs
-  - TSCTransformerTimestamps
-  - TSCTransformer
+  # - TSCTransformerAbs
+  # - TSCTransformerTimestamps
+  # - TSCTransformer
+  - TSCTransformerTime2Vec
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
