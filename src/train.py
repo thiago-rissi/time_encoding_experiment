@@ -30,15 +30,17 @@ def parse_args(args: list[str]) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main(args: list[str]):
+def main_train(args: list[str] | None = None, path: str | None = None):
     """Receives args from terminal.
 
     Receives args from terminal and performs training accordingly.
 
     """
-    args_ = parse_args(args)
+    if path == None:
+        args_ = parse_args(args)
+        path = pathlib.Path(args_.config)
 
-    with open(pathlib.Path(args_.config), "r") as f:
+    with open(path, "r") as f:
         config = yaml.safe_load(f)
 
     with open(pathlib.Path("src/models/metadata.yml"), "r") as f:
@@ -51,4 +53,4 @@ def main(args: list[str]):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main_train(sys.argv[1:])
