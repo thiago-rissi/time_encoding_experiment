@@ -178,7 +178,7 @@ TSCTransformer:
     hidden_size: 400
     dropout: 0.1
 
-TSCTransformer:
+TSCTransformerTime2Vec:
   torch: true
   test_nan: true
   encoder: 
