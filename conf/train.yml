@@ -14,7 +14,7 @@ models:
   # - TSCRNNAbs
   # - TSCRNNTimestamps
   # - TSCRNN
-  - TSCRNNTime2Vec
+  # - TSCRNNTime2Vec
   # - TSCTransformerRel
   # - TSCTransformerAbs
   # - TSCTransformerTimestamps
