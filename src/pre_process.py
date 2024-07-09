@@ -3,7 +3,7 @@ import pathlib
 import yaml
 import sys
 
-from pre_process_code.utils import pre_process
+from pre_process_node.pre_process_node import pre_process
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:

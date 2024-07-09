@@ -5,7 +5,7 @@ from dataset.utils import *
 import pathlib
 import numpy as np
 import pickle
-from models.time_encoder import PositionalEncoding
+from models.time_encoders import PositionalEncoding
 from pre_process_code.rocket import apply_rocket
 
 

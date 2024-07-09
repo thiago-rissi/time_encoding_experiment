@@ -3,7 +3,7 @@ import pathlib
 import yaml
 import sys
 
-from test_code.utils import test
+from test_node.test_node import test
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:

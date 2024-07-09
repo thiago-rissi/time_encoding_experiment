@@ -1,11 +1,16 @@
 import numpy as np
 from torch import nn
-from time_encoder import (
+from models.time_encoders import (
     tAPE,
     AbsolutePositionalEncoding,
     LearnablePositionalEncoding,
 )
 from attention import Attention, Attention_Rel_Scl, Attention_Rel_Vec
+import torch
+import torch.nn as nn
+from models.time_encoders import *
+from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
+import torch.nn.functional as F
 
 
 def count_parameters(model):
@@ -83,3 +88,68 @@ class Transformer(nn.Module):
         # out = self.out(out[-1])
 
         return out
+
+
+class TransformerTorch(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        batch_first: bool,
+        dropout: float,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+
+        d_model = input_size
+
+        encoder_layer = TransformerEncoderLayer(
+            batch_first=batch_first,
+            d_model=d_model,
+            nhead=4,
+        )
+        self.encoder = TransformerEncoder(
+            encoder_layer=encoder_layer,
+            num_layers=num_layers,
+        )
+
+        self.linear = nn.Linear(
+            in_features=d_model,
+            out_features=hidden_size,
+        )
+
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        X_encoded = self.encoder(X)
+        X_encoded = self.dropout(X_encoded)
+        X_mean = X_encoded[:, -1]
+        X_linear = self.linear(X_mean)
+
+        return X_linear
+
+
+class RNN(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        num_layers: int,
+        batch_first: bool,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+
+        self.num_layers = num_layers
+        self.encoder = GRU(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=batch_first,
+        )
+
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        _, h_t = self.encoder(X)
+
+        return h_t[-1]
