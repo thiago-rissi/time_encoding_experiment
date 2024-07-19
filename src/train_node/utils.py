@@ -20,11 +20,13 @@ def torch_train_step(
     model_name: str,
     datasets_config: dict,
     config: dict,
+    encoder: dict,
+    decoder: dict,
     torch_trainer: dict,
     device: torch.device,
 ) -> None:
 
-    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+    time_encoding_strategy = config["time_encoding"]["strategy"]
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
@@ -39,7 +41,9 @@ def torch_train_step(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        **config,
+        ts_encoding=encoder,
+        decoder=decoder,
+        model_config=config,
     )
 
     trainer = TorchTrainer(model=model, **class_trainer_config)

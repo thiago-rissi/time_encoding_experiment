@@ -1,30 +1,57 @@
 datasets:
+  - AtrialFibrillation
+  - ArticularyWordRecognition
+  - BasicMotions
+  - Cricket
+  - DuckDuckGeese
   - ERing
   - Epilepsy
-  - Heartbeat
-  - UWaveGestureLibrary
-  - ArticularyWordRecognition
+  - EigenWorms
   - EthanolConcentration
-  - Libras
-  - AsphaltPavementTypeCoordinates
   - FingerMovements
   - Handwriting
+  - HandMovementDirection
+  - Heartbeat
+  - JapaneseVowels
+  - LSST
+  - Libras
+  - MotorImagery
+  - NATOPS
+  - PEMS-SF
+  - Phoneme
+  - RacketSports
+  - SelfRegulationSCP1
+  - SelfRegulationSCP2
+  - StandWalkJump
+  - SpokenArabicDigits
+  - UWaveGestureLibrary
+
 models:
-  # - TSCRNNRel
-  # - TSCRNNAbs
-  # - TSCRNNTimestamps
-  # - TSCRNN
-  # - TSCRNNTime2Vec
-  # - TSCTransformerRel
-  # - TSCTransformerAbs
-  # - TSCTransformerTimestamps
-  # - TSCTransformer
-  - TSCTransformerTime2Vec
+  - RNN
+  - RNNTime2Vec
+  - RNNPos
+  - RNNtPos
+  - RNNLinear
+  - RNNDelta
+  - RNNTime2VecDelta
+  - RNNPosDelta
+  - RNNtPosDelta
+  - RNNLinearDelta
+  - Transformer
+  - TransformerTime2Vec
+  - TransformerPos
+  - TransformertPos
+  - TransformerLinear
+  - TransformerDelta
+  - TransformerTime2VecDelta
+  - TransformerPosDelta
+  - TransformertPosDelta
+  - TransformerLinearDelta
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
   # - ResNetClassifier
-  
+
 torch_trainer:
   classification_training:
     loss: CrossEntropyLoss

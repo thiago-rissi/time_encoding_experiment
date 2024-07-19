@@ -5,7 +5,7 @@ from models.time_encoders import (
     AbsolutePositionalEncoding,
     LearnablePositionalEncoding,
 )
-from attention import Attention, Attention_Rel_Scl, Attention_Rel_Vec
+from models.attention import Attention, Attention_Rel_Scl, Attention_Rel_Vec
 import torch
 import torch.nn as nn
 from models.time_encoders import *
@@ -23,57 +23,58 @@ class Permute(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, config, num_classes):
+    def __init__(
+        self,
+        seq_len: int,
+        hidden_size: int,
+        input_size: int,
+        fix_pos_encode: str | None = None,
+        rel_pos_encode: str | None = None,
+        **kwargs,
+    ):
         super().__init__()
         # Parameters Initialization -----------------------------------------------
-        channel_size, seq_len = config["Data_shape"][1], config["Data_shape"][2]
-        emb_size = config["emb_size"]
-        num_heads = config["num_heads"]
-        dim_ff = config["dim_ff"]
-        self.Fix_pos_encode = config["Fix_pos_encode"]
-        self.Rel_pos_encode = config["Rel_pos_encode"]
+        emb_size = input_size
+        num_heads = 4
+        dim_ff = 2048
+        self.fix_pos_encode = fix_pos_encode
+        self.rel_pos_encode = rel_pos_encode
         # Embedding Layer -----------------------------------------------------------
-        self.embed_layer = nn.Sequential(
-            nn.Linear(channel_size, emb_size), nn.LayerNorm(emb_size, eps=1e-5)
-        )
+        self.embed_layer = nn.LayerNorm(emb_size, eps=1e-5)
 
-        if self.Fix_pos_encode == "Sin":
-            self.Fix_Position = tAPE(
-                emb_size, dropout=config["dropout"], max_len=seq_len
-            )
-        elif config["Fix_pos_encode"] == "Learn":
+        if self.fix_pos_encode == "Sin":
+            self.Fix_Position = tAPE(emb_size, dropout=0.1, max_len=seq_len)
+        elif self.fix_pos_encode == "Learn":
             self.Fix_Position = LearnablePositionalEncoding(
-                emb_size, dropout=config["dropout"], max_len=seq_len
+                emb_size, dropout=0.1, max_len=seq_len
             )
 
         self.LayerNorm1 = nn.LayerNorm(emb_size, eps=1e-5)
         self.LayerNorm2 = nn.LayerNorm(emb_size, eps=1e-5)
-        if self.Rel_pos_encode == "Scalar":
-            self.attention_layer = Attention_Rel_Scl(
-                emb_size, num_heads, seq_len, config["dropout"]
-            )
-        elif self.Rel_pos_encode == "Vector":
-            self.attention_layer = Attention_Rel_Vec(
-                emb_size, num_heads, seq_len, config["dropout"]
-            )
+        if self.rel_pos_encode == "Scalar":
+            self.attention_layer = Attention_Rel_Scl(emb_size, num_heads, seq_len, 0.1)
+        elif self.rel_pos_encode == "Vector":
+            self.attention_layer = Attention_Rel_Vec(emb_size, num_heads, seq_len, 0.1)
         else:
-            self.attention_layer = Attention(emb_size, num_heads, config["dropout"])
+            self.attention_layer = Attention(emb_size, num_heads, 0.1)
 
         self.FeedForward = nn.Sequential(
             nn.Linear(emb_size, dim_ff),
             nn.ReLU(),
-            nn.Dropout(config["dropout"]),
+            nn.Dropout(0.1),
             nn.Linear(dim_ff, emb_size),
-            nn.Dropout(config["dropout"]),
+            nn.Dropout(0.1),
         )
 
         self.gap = nn.AdaptiveAvgPool1d(1)
-        self.flatten = nn.Flatten()
-        self.out = nn.Linear(emb_size, num_classes)
+        self.linear = nn.Linear(
+            in_features=emb_size,
+            out_features=hidden_size,
+        )
 
-    def forward(self, x):
-        x_src = self.embed_layer(x.permute(0, 2, 1))
-        if self.Fix_pos_encode != "None":
+    def forward(self, X):
+        x_src = self.embed_layer(X)
+        if self.fix_pos_encode != None:
             x_src = self.Fix_Position(x_src)
         att = x_src + self.attention_layer(x_src)
         att = self.LayerNorm1(att)
@@ -82,8 +83,7 @@ class Transformer(nn.Module):
 
         out = out.permute(0, 2, 1)
         out = self.gap(out)
-        out = self.flatten(out)
-        out = self.out(out)
+        out = self.linear(out)
         # out = out.permute(1, 0, 2)
         # out = self.out(out[-1])
 
@@ -124,8 +124,8 @@ class TransformerTorch(nn.Module):
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         X_encoded = self.encoder(X)
         X_encoded = self.dropout(X_encoded)
-        X_mean = X_encoded[:, -1]
-        X_linear = self.linear(X_mean)
+        X_hidden = X_encoded[:, -1]
+        X_linear = self.linear(X_hidden)
 
         return X_linear
 

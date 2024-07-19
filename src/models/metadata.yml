@@ -1,204 +1,211 @@
-TSCRNNRel:
-  torch: true
-  test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: RNN
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: PositionalEncoding
-      time_encoding_size: 100
-      strategy: relative
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    decoder_class: LinearDecoder
-    hidden_size: 400
-    dropout: 0.1
+Encoder:
+  hidden_size: 400
+  num_layers: 1
+  batch_first: True
+  input_size: 200
+ 
+Decoder:
+  hidden_size: 400
+  dropout: 0.1
 
-TSCRNNTime2Vec:
+RNN:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: RNN
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: Time2Vec
-      time_encoding_size: 100
-      strategy: t2v
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: null   
+    strategy: absolute
+    time_encoding_size: 0
     dropout: 0.1
+  decoder_class: LinearDecoder
 
-TSCRNNAbs:
+RNNTime2Vec:
   torch: true
   test_nan: true
-  encoder:
-    ts_encoding:
-      encoder_class: RNN
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: PositionalEncoding
-      time_encoding_size: 100
-      strategy: absolute
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: Time2Vec
+    strategy: t2v
+    time_encoding_size: 100
     dropout: 0.1
-
-TSCRNNTimestamps:
-  torch: true
-  test_nan: true
-  encoder:
-    ts_encoding:
-      encoder_class: RNN
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: Linear
-      time_encoding_size: 100
-      strategy: timestamps
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
-    dropout: 0.1
-
-TSCRNN:
-  torch: true
-  test_nan: true
-  encoder:
-    ts_encoding:
-      encoder_class: RNN
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: null   
-      time_encoding_size: 0 
-      strategy: none
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
-    dropout: 0.1
+  decoder_class: LinearDecoder
   
-TSCTransformerRel:
+RNNPos:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: Transformer
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: PositionalEncoding
-      time_encoding_size: 100
-      strategy: relative
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: PositionalEncoding
+    strategy: absolute
+    time_encoding_size: 100
     dropout: 0.1
+  decoder_class: LinearDecoder
+ 
+RNNtPos:
+  torch: true
+  test_nan: true
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: tAPE
+    strategy: absolute
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
 
-TSCTransformerAbs:
+RNNLinear:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: Transformer
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: PositionalEncoding
-      time_encoding_size: 100
-      strategy: absolute
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: Linear
+    strategy: linear
+    time_encoding_size: 100
     dropout: 0.1
+  decoder_class: LinearDecoder
 
-TSCTransformerTimestamps:
+RNNTime2VecDelta:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: Transformer
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: Linear
-      time_encoding_size: 100
-      strategy: timestamps
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: Time2Vec
+    strategy: delta
+    time_encoding_size: 100
     dropout: 0.1
+  decoder_class: LinearDecoder
+  
+RNNPosDelta:
+  torch: true
+  test_nan: true
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: PositionalEncoding
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+ 
+RNNtPosDelta:
+  torch: true
+  test_nan: true
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: tAPE
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
 
-TSCTransformer:
+RNNLinearDelta:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: Transformer
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: Time2Vec
-      time_encoding_size: 0
-      strategy: t2v
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: Linear
+    strategy: delta
+    time_encoding_size: 100
     dropout: 0.1
+  decoder_class: LinearDecoder
+  
+Transformer:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: null
+    strategy: absolute
+    time_encoding_size: 0
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  
+TransformerPos:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: PositionalEncoding
+    strategy: absolute
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
 
-TSCTransformerTime2Vec:
+TransformerLinear:
   torch: true
   test_nan: true
-  encoder: 
-    ts_encoding:
-      encoder_class: Transformer
-      hidden_size: 400
-      num_layers: 1
-      batch_first: True
-      dropout: 0.1
-    time_encoding:
-      time_encoding_class: null
-      time_encoding_size: 0
-      strategy: none
-      dropout: 0.1
-    input_size: 200
-  decoder:
-    hidden_size: 400
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Linear
+    strategy: linear
+    time_encoding_size: 100
     dropout: 0.1
-    
+  decoder_class: LinearDecoder
+
+TransformertPos:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: tAPE
+    strategy: absolute
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  
+TransformerTime2Vec:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Time2Vec
+    strategy: t2v
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  
+TransformerPosDelta:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: PositionalEncoding
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
+TransformerLinearDelta:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Linear
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
+TransformertPosDelta:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: tAPE
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  
+TransformerTime2VecDelta:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Time2Vec
+    strategy: delta
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
 TSAREncoderDecoder:
   torch: true
   test_nan: true

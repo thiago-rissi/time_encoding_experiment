@@ -14,6 +14,8 @@ def train(
     base_path = pathlib.Path("data/feature")
     for model_name in models:
         config = models_config[model_name]
+        encoder = models_config["Encoder"]
+        decoder = models_config["Decoder"]
         print(f"Training model: {model_name}")
         for dataset_name in datasets:
             print(f"---> Dataset: {dataset_name}")
@@ -26,6 +28,8 @@ def train(
                     model_name,
                     datasets_config,
                     config,
+                    encoder,
+                    decoder,
                     torch_trainer,
                     device,
                 )

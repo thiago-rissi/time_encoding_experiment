@@ -16,12 +16,9 @@ def test(
     for model_name in models:
         print(f"Testing model: {model_name}")
 
-        if "TSClassifier" in model_name:
-            with open(f"data/models/{model_name}/model.yml", "r") as f:
-                config = yaml.safe_load(f)
-        else:
-            config = models_config[model_name]
-
+        config = models_config[model_name]
+        encoder = models_config["Encoder"]
+        decoder = models_config["Decoder"]
         for dataset_name in datasets:
             print(f"---> Dataset: {dataset_name}")
             dataset_path = base_path / dataset_name
@@ -37,6 +34,8 @@ def test(
                         pmiss,
                         model_name,
                         config,
+                        encoder,
+                        decoder,
                         datasets_config,
                         torch_tester,
                         device,

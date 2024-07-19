@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 import sys
 from models.time_encoders import *
-from encoders import *
-from decoders import *
-from utils import *
+from models.encoders import *
+from models.decoders import *
+from models.utils import *
 
 
 class TSDecoder(nn.Module):
@@ -27,20 +27,24 @@ class TSDecoder(nn.Module):
 class TSEncoder(nn.Module):
     def __init__(
         self,
-        time_encoding: dict,
         ts_encoding: dict,
-        input_size: int,
+        time_encoding: dict,
+        encoder_class: str,
         num_features: int,
+        t_length: int,
         **kwargs,
     ) -> None:
 
         super().__init__()
         self.time_encoder: nn.Module | None = None
         self.unsqueeze_timestamps = False
+        self.input_size = ts_encoding["input_size"]
         self.time_encoding_size = time_encoding["time_encoding_size"]
         self.time_encoding_strategy = time_encoding["strategy"]
         self.time_encoding_class = time_encoding["time_encoding_class"]
-        self.projection = nn.Linear(num_features + self.time_encoding_size, input_size)
+        self.projection = nn.Linear(
+            num_features + self.time_encoding_size, self.input_size
+        )
 
         if self.time_encoding_class == "PositionalEncoding":
             self.time_encoder = PositionalEncoding(**time_encoding)
@@ -53,13 +57,16 @@ class TSEncoder(nn.Module):
             self.time_encoder = Time2Vec(1, self.time_encoding_size)
             self.unsqueeze_timestamps = True
 
-        else:
-            Exception("Invalid time encoding strategy")
+        elif self.time_encoding_class == "tAPE":
+            self.time_encoder = tAPE(
+                self.time_encoding_size, max_len=t_length, **time_encoding
+            )
 
-        encoder_class = getattr(sys.modules[__name__], ts_encoding["encoder_class"])
+        encoder_class = getattr(sys.modules[__name__], encoder_class)
         self.encoder_wrapper = encoder_class(
-            input_size=input_size,
+            seq_len=t_length,
             **ts_encoding,
+            **time_encoding,
         )
 
     def forward(
@@ -88,17 +95,24 @@ class TSEncoder(nn.Module):
 class TSClassifier(nn.Module):
     def __init__(
         self,
-        encoder: dict,
+        ts_encoding: dict,
         decoder: dict,
         num_classes: int,
         num_features: int,
+        model_config: dict,
+        t_length: int,
         **kwargs,
     ) -> None:
 
         super().__init__()
 
-        self.encoder = TSEncoder(num_features=num_features, **encoder)
-        self.decoder = TSDecoder(num_classes=num_classes, **decoder)
+        self.encoder = TSEncoder(
+            num_features=num_features,
+            ts_encoding=ts_encoding,
+            t_length=t_length,
+            **model_config,
+        )
+        self.decoder = TSDecoder(num_classes=num_classes, **decoder, **model_config)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
         h_t = self.encoder(X, timestamps)

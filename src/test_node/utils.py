@@ -18,10 +18,6 @@ def load_model(
         list(pathlib.Path(model_basepath).rglob("*best.pkl")),
         key=lambda x: int(x.stem.split("_")[-2]),
     )[-1]
-    # model_path = list(pathlib.Path(model_basepath).rglob("*.pkl"))[-1]
-    # model_path = pathlib.Path(
-    #     "data/models/TSClassifierTransformer/EthanolConcentration/model_20.pkl"
-    # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
@@ -32,6 +28,8 @@ def torch_test_step(
     pmiss: float,
     model_name: str,
     config: dict,
+    encoder: dict,
+    decoder: dict,
     datasets_config: dict,
     torch_tester: dict,
     device: torch.device,
@@ -43,7 +41,7 @@ def torch_test_step(
         else pmiss_path / f"{dataset_name}_{int(100*pmiss)}.ts"
     )
 
-    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+    time_encoding_strategy = config["time_encoding"]["strategy"]
 
     dataset = TorchDataset(
         dataset_path=test_path,
@@ -57,7 +55,9 @@ def torch_test_step(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        **config,
+        ts_encoding=encoder,
+        decoder=decoder,
+        model_config=config,
     )
 
     model = load_model(
