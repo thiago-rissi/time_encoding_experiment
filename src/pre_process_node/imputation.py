@@ -87,24 +87,35 @@ class MissForest:
 
 
 def create_nan_ts(
-    ts: npt.NDArray, pmiss: float, strategy: str = "same", tol: float = 0.025
+    ts: npt.NDArray,
+    pmiss: float,
+    strategy: str = "same",
+    tol: float = 0.025,
+    window_mean: float = 0.1,
+    window_std: float = 0.02,
 ) -> npt.NDArray:
     miss_points = 0
     total_points = len(ts)
+    mean = window_mean * total_points
+    std = window_std * total_points
+    n_insert = int(np.random.normal(mean, std))
+    mask = np.zeros(total_points)
 
     pmiss_ = miss_points / total_points
-    while pmiss_ < pmiss - tol:
-        n_insert = int(total_points * 0.05)
+    while pmiss_ < pmiss:
         id_insert = random.randint(0, total_points - 1)
+        mask[id_insert : id_insert + n_insert] = 1
+        pmiss_ = sum(mask) / total_points
 
-        if strategy == "same":
-            ts[id_insert : id_insert + n_insert, :] = np.nan
-            miss_points = np.count_nonzero(np.isnan(ts[:, 0]))
-        elif strategy == "diff":
-            ts[id_insert : id_insert + n_insert] = np.nan
-            miss_points = np.count_nonzero(np.isnan(ts))
+    if pmiss_ > abs(pmiss - tol):
+        n_remove = int(abs(pmiss - pmiss_) * total_points)
+        mask[id_insert + n_insert - n_remove : id_insert + n_insert] = 0
 
-        pmiss_ = miss_points / total_points
+    mask = mask.astype(bool)
+    if strategy == "same":
+        ts[mask, :] = np.nan
+    elif strategy == "diff":
+        ts[mask] = np.nan
 
     return ts
 
@@ -115,6 +126,8 @@ def create_nan_dataset(
     n_instances: int,
     n_variables: int,
     nan_strategy: str = "same",
+    window_mean: float = 0.1,
+    window_std: float = 0.02,
 ):
 
     xs_nan = []
@@ -123,7 +136,11 @@ def create_nan_dataset(
 
         if nan_strategy == "same":
             x_i_nan = create_nan_ts(
-                x_i.swapaxes(0, 1), pmiss=pmiss, strategy=nan_strategy
+                x_i.swapaxes(0, 1),
+                pmiss=pmiss,
+                strategy=nan_strategy,
+                window_mean=window_mean,
+                window_std=window_std,
             )
         elif nan_strategy == "diff":
             x_i_nan = np.stack(

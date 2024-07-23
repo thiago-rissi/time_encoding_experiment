@@ -26,26 +26,27 @@ datasets:
   - SpokenArabicDigits
   - UWaveGestureLibrary
 models:
-  - RNN
-  - RNNTime2Vec
-  - RNNPos
-  - RNNtPos
-  - RNNLinear
-  - RNNDelta
-  - RNNTime2VecDelta
-  - RNNPosDelta
-  - RNNtPosDelta
-  - RNNLinearDelta
-  - Transformer
-  - TransformerTime2Vec
-  - TransformerPos
-  - TransformertPos
-  - TransformerLinear
-  - TransformerDelta
-  - TransformerTime2VecDelta
-  - TransformerPosDelta
-  - TransformertPosDelta
-  - TransformerLinearDelta
+  - RNNGRU
+  # - RNN
+  # - RNNTime2Vec
+  # - RNNPos
+  # - RNNtPos
+  # - RNNLinear
+  # - RNNDelta
+  # - RNNTime2VecDelta
+  # - RNNPosDelta
+  # - RNNtPosDelta
+  # - RNNLinearDelta
+  # - Transformer
+  # - TransformerTime2Vec
+  # - TransformerPos
+  # - TransformertPos
+  # - TransformerLinear
+  # - TransformerDelta
+  # - TransformerTime2VecDelta
+  # - TransformerPosDelta
+  # - TransformertPosDelta
+  # - TransformerLinearDelta
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2

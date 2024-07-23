@@ -19,6 +19,17 @@ RNN:
     dropout: 0.1
   decoder_class: LinearDecoder
 
+RNNGRU:
+  torch: true
+  test_nan: true
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: GRUEncoding   
+    strategy: absolute
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
 RNNTime2Vec:
   torch: true
   test_nan: true

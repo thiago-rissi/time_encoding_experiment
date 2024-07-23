@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import math
+from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
 
 
 class PositionalEncoding(nn.Module):
@@ -77,6 +78,27 @@ class tAPE(nn.Module):
             * (self.hidden_size / self.max_len)
         )
         return self.dropout(pe)
+
+
+class GRUEncoding(nn.Module):
+    def __init__(
+        self,
+        time_encoding_size: int,
+        **kwargs,
+    ) -> None:
+        super(GRUEncoding, self).__init__()
+        self.encoder = GRU(
+            input_size=1,
+            hidden_size=time_encoding_size,
+            num_layers=1,
+            batch_first=True,
+        )
+
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
+        seq_len = t.shape[-1]
+        _, h_t = self.encoder(t.unsqueeze(-1))
+        out = h_t[-1].unsqueeze(1).expand(-1, seq_len, -1)
+        return out
 
 
 class AbsolutePositionalEncoding(nn.Module):

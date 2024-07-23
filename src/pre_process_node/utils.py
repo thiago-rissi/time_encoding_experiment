@@ -53,6 +53,8 @@ def pre_process_step(
     nan_strategy: str,
     imputer: Any,
     impute: bool,
+    window_mean: float,
+    window_std: float,
 ) -> None:
 
     print(f"---> Missing percentage: {int(100*pmiss)}%")
@@ -67,6 +69,8 @@ def pre_process_step(
         n_instances=n_instances,
         n_variables=n_variables,
         nan_strategy=nan_strategy,
+        window_mean=window_mean,
+        window_std=window_std,
     )
     write_to_tsfile(
         X=X_nan.swapaxes(1, 2),

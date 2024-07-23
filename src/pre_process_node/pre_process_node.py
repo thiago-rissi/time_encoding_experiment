@@ -12,6 +12,8 @@ def pre_process(
     nan_strategy: dict[str, str],
     max_iter: int,
     process_train: bool,
+    window_mean: float,
+    window_std: float,
     **kwargs,
 ) -> None:
 
@@ -54,6 +56,8 @@ def pre_process(
                 nan_strategy=nan_strategy[dataset],
                 imputer=imputer,
                 impute=impute,
+                window_mean=window_mean,
+                window_std=window_std,
             )
         final_time = datetime.datetime.now()
         print(f"Total Execution time: {final_time - initial_time}")

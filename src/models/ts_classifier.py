@@ -58,9 +58,10 @@ class TSEncoder(nn.Module):
             self.unsqueeze_timestamps = True
 
         elif self.time_encoding_class == "tAPE":
-            self.time_encoder = tAPE(
-                self.time_encoding_size, max_len=t_length, **time_encoding
-            )
+            self.time_encoder = tAPE(max_len=t_length, **time_encoding)
+
+        elif self.time_encoding_class == "GRUEncoding":
+            self.time_encoder = GRUEncoding(**time_encoding)
 
         encoder_class = getattr(sys.modules[__name__], encoder_class)
         self.encoder_wrapper = encoder_class(
