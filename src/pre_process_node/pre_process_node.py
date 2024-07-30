@@ -16,7 +16,27 @@ def pre_process(
     window_std: float,
     **kwargs,
 ) -> None:
+    """
+    Pre-processes the datasets by performing missing data imputation and feature engineering.
 
+    Args:
+        datasets (list[str]): List of dataset names to be pre-processed.
+        pmiss_list (list[float]): List of missing data percentages to be considered.
+        imputer_name (str): Name of the imputer class to be used for missing data imputation.
+        impute (bool): Flag indicating whether missing data imputation should be performed.
+        primary_path (str): Path to the primary directory where pre-processed datasets will be stored.
+        feature_path (str): Path to the directory where feature engineering results will be stored.
+        train_ratio (float): Ratio of training data to total data for splitting the datasets.
+        nan_strategy (dict[str, str]): Dictionary mapping dataset names to nan strategy names.
+        max_iter (int): Maximum number of iterations for the imputer.
+        process_train (bool): Flag indicating whether to pre-process the training data without missing data.
+        window_mean (float): percentage of the context window for considering as a normal distribution's mean, in order to sample missing gap's size in feature engineering.
+        window_std (float): percentage of the context window for considering as a normal distribution's standard deviation, in order to sample missing gap's size in feature engineering.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        None
+    """
     primary_path = pathlib.Path(primary_path)
     feature_path = pathlib.Path(feature_path)
     imputer_class = getattr(sys.modules[__name__], imputer_name)

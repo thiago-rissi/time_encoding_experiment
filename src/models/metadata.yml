@@ -19,14 +19,14 @@ RNN:
     dropout: 0.1
   decoder_class: LinearDecoder
 
-RNNGRU:
+RNNTimestamps:
   torch: true
   test_nan: true
   encoder_class: RNN
   time_encoding:
-    time_encoding_class: GRUEncoding   
+    time_encoding_class: Timestamps  
     strategy: absolute
-    time_encoding_size: 100
+    time_encoding_size: 1
     dropout: 0.1
   decoder_class: LinearDecoder
 
@@ -95,7 +95,18 @@ RNNPosDelta:
     time_encoding_size: 100
     dropout: 0.1
   decoder_class: LinearDecoder
- 
+
+RNNTimestampsDelta:
+  torch: true
+  test_nan: true
+  encoder_class: RNN
+  time_encoding:
+    time_encoding_class: Timestamps  
+    strategy: delta
+    time_encoding_size: 1
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
 RNNtPosDelta:
   torch: true
   test_nan: true
@@ -128,7 +139,18 @@ Transformer:
     time_encoding_size: 0
     dropout: 0.1
   decoder_class: LinearDecoder
-  
+
+TransformerTimestamps:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Timestamps
+    strategy: absolute
+    time_encoding_size: 1
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
 TransformerPos:
   torch: true
   test_nan: true
@@ -172,7 +194,19 @@ TransformerTime2Vec:
     time_encoding_size: 100
     dropout: 0.1
   decoder_class: LinearDecoder
-  
+
+TransformerTimestampsDelta:
+  torch: true
+  test_nan: true
+  encoder_class: TransformerTorch
+  time_encoding:
+    time_encoding_class: Timestamps
+    strategy: delta
+    time_encoding_size: 1
+    dropout: 0.1
+  decoder_class: LinearDecoder
+
+
 TransformerPosDelta:
   torch: true
   test_nan: true

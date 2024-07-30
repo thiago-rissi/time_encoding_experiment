@@ -9,7 +9,20 @@ def apply_rocket(
     X: npt.NDArray,
     base_path: pathlib.Path,
 ) -> None:
+    """
+    Applies the ROCKET transformation to the input data.
 
+    Args:
+        X (numpy.ndarray): The input data to be transformed.
+        base_path (pathlib.Path): The base path where the ROCKET model will be saved.
+
+    Returns:
+        numpy.ndarray: The transformed data.
+
+    Raises:
+        None
+
+    """
     rocket_path = base_path / "rocket.pkl"
     if rocket_path.exists():
         with open(rocket_path, "rb") as f:

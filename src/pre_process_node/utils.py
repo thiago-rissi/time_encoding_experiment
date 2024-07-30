@@ -8,6 +8,17 @@ import datetime
 def open_and_split(
     dataset: str, dataset_path: pathlib.Path, train_ratio: float
 ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+    """
+    Opens and splits a dataset into training and testing sets.
+
+    Args:
+        dataset (str): The name of the dataset.
+        dataset_path (pathlib.Path): The path to the dataset.
+        train_ratio (float): The ratio of the dataset to use for training.
+
+    Returns:
+        tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]: A tuple containing the training and testing data and labels.
+    """
     path_train = dataset_path / (dataset + "_TRAIN.ts")
     path_test = dataset_path / (dataset + "_TEST.ts")
 
@@ -30,6 +41,21 @@ def base_data(
     rocket_path: pathlib.Path,
     out_path: pathlib.Path,
 ) -> None:
+    """
+    Preprocesses and saves the base data for a given dataset.
+
+    Args:
+        X_train (npt.NDArray): The training input data.
+        y_train (npt.NDArray): The training target data.
+        X_test (npt.NDArray): The test input data.
+        y_test (npt.NDArray): The test target data.
+        dataset (str): The name of the dataset.
+        rocket_path (pathlib.Path): The path to the rocket file.
+        out_path (pathlib.Path): The output path to save the preprocessed data.
+
+    Returns:
+        None
+    """
     write_to_tsfile(
         X=X_train,
         y=y_train,
@@ -56,7 +82,24 @@ def pre_process_step(
     window_mean: float,
     window_std: float,
 ) -> None:
+    """
+    Pre-processes the input data by creating missing points and imputing data points.
 
+    Args:
+        X_test (npt.NDArray): The input feature matrix.
+        y_test (npt.NDArray): The input target vector.
+        pmiss (float): The percentage of missing values to create.
+        out_path (pathlib.Path): The output path to save the pre-processed data.
+        dataset (str): The name of the dataset.
+        nan_strategy (str): The strategy to create missing values.
+        imputer (Any): The imputer object to use for imputation.
+        impute (bool): Flag indicating whether to perform imputation or not.
+        window_mean (float): percentage of the context window for considering as a normal distribution's mean, in order to sample missing gap's size in feature engineering.
+        window_std (float): percentage of the context window for considering as a normal distribution's standard deviation, in order to sample missing gap's size in feature engineering.
+
+    Returns:
+        None
+    """
     print(f"---> Missing percentage: {int(100*pmiss)}%")
     n_instances = X_test.shape[0]
     n_variables = X_test.shape[1]

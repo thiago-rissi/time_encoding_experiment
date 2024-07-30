@@ -9,6 +9,20 @@ from models.utils import *
 
 
 class TSDecoder(nn.Module):
+    """
+    Time Series Decoder module.
+
+    Args:
+        num_classes (int): The number of output classes.
+        decoder_class (str): The name of the decoder class.
+        hidden_size (int): The size of the hidden state.
+        **kwargs: Additional keyword arguments to be passed to the decoder class.
+
+    Attributes:
+        decoder (nn.Module): The decoder module.
+
+    """
+
     def __init__(
         self, num_classes, decoder_class: str, hidden_size: int, **kwargs
     ) -> None:
@@ -20,11 +34,44 @@ class TSDecoder(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the TSDecoder module.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The output tensor.
+
+        """
         y_hat = self.decoder(x)
         return y_hat
 
 
 class TSEncoder(nn.Module):
+    """
+    Time Series Encoder module.
+
+    Args:
+        ts_encoding (dict): Dictionary containing parameters for time series encoding.
+        time_encoding (dict): Dictionary containing parameters for time encoding.
+        encoder_class (str): Name of the encoder class.
+        num_features (int): Number of input features.
+        t_length (int): Length of the time series.
+        **kwargs: Additional keyword arguments.
+
+    Attributes:
+        time_encoder (nn.Module | None): Time encoder module.
+        unsqueeze_timestamps (bool): Flag indicating whether to unsqueeze timestamps.
+        input_size (int): Size of the input.
+        time_encoding_size (int): Size of the time encoding.
+        time_encoding_strategy (str): Strategy for time encoding.
+        time_encoding_class (str): Class name of the time encoder.
+        projection (nn.Linear): Linear projection layer.
+        encoder_wrapper: Encoder wrapper module.
+
+    """
+
     def __init__(
         self,
         ts_encoding: dict,
@@ -34,7 +81,6 @@ class TSEncoder(nn.Module):
         t_length: int,
         **kwargs,
     ) -> None:
-
         super().__init__()
         self.time_encoder: nn.Module | None = None
         self.unsqueeze_timestamps = False
@@ -60,8 +106,8 @@ class TSEncoder(nn.Module):
         elif self.time_encoding_class == "tAPE":
             self.time_encoder = tAPE(max_len=t_length, **time_encoding)
 
-        elif self.time_encoding_class == "GRUEncoding":
-            self.time_encoder = GRUEncoding(**time_encoding)
+        elif self.time_encoding_class == "Timestamps":
+            self.time_encoder = lambda x: x.unsqueeze(-1)
 
         encoder_class = getattr(sys.modules[__name__], encoder_class)
         self.encoder_wrapper = encoder_class(
@@ -75,7 +121,17 @@ class TSEncoder(nn.Module):
         X: torch.Tensor,
         timestamps: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Forward pass of the TSEncoder module.
 
+        Args:
+            X (torch.Tensor): Input tensor of shape (batch_size, num_features, t_length).
+            timestamps (torch.Tensor): Timestamps tensor of shape (batch_size, t_length).
+
+        Returns:
+            tuple[torch.Tensor, torch.Tensor]: Tuple containing the output tensor and hidden state tensor.
+
+        """
         X = X.swapaxes(1, 2)
 
         if self.time_encoder is not None:
@@ -94,6 +150,23 @@ class TSEncoder(nn.Module):
 
 
 class TSClassifier(nn.Module):
+    """
+    Time Series Classifier model.
+
+    Args:
+        ts_encoding (dict): Dictionary containing the parameters for time series encoding.
+        decoder (dict): Dictionary containing the parameters for the decoder.
+        num_classes (int): Number of classes for classification.
+        num_features (int): Number of features in the input time series.
+        model_config (dict): Dictionary containing additional model configuration parameters.
+        t_length (int): Length of the time series.
+        **kwargs: Additional keyword arguments.
+
+    Attributes:
+        encoder (TSEncoder): Time series encoder module.
+        decoder (TSDecoder): Time series decoder module.
+    """
+
     def __init__(
         self,
         ts_encoding: dict,
@@ -104,7 +177,6 @@ class TSClassifier(nn.Module):
         t_length: int,
         **kwargs,
     ) -> None:
-
         super().__init__()
 
         self.encoder = TSEncoder(
@@ -116,6 +188,16 @@ class TSClassifier(nn.Module):
         self.decoder = TSDecoder(num_classes=num_classes, **decoder, **model_config)
 
     def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
+        """
+        Forward pass of the TSClassifier model.
+
+        Args:
+            X (torch.Tensor): Input time series tensor of shape (batch_size, num_features, t_length).
+            timestamps (torch.Tensor): Timestamps tensor of shape (batch_size, t_length).
+
+        Returns:
+            torch.Tensor: Predicted class probabilities tensor of shape (batch_size, num_classes).
+        """
         h_t = self.encoder(X, timestamps)
         y_hat = self.decoder(h_t.squeeze(0))
         return y_hat

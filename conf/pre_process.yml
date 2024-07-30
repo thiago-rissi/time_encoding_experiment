@@ -3,32 +3,32 @@ imputer_name: MissForest
 primary_path: data/primary
 feature_path: data/feature
 datasets:
-  - AtrialFibrillation
-  - ArticularyWordRecognition
-  - BasicMotions
-  - Cricket
-  - DuckDuckGeese
-  - ERing
-  - Epilepsy
-  - EigenWorms
-  - EthanolConcentration
-  - FingerMovements
-  - Handwriting
-  - HandMovementDirection
-  - Heartbeat
-  - JapaneseVowels
+  # - AtrialFibrillation
+  # - ArticularyWordRecognition
+  # - BasicMotions
+  # - Cricket
+  # - DuckDuckGeese
+  # - ERing
+  # - Epilepsy
+  # - EigenWorms
+  # - EthanolConcentration
+  # - FingerMovements
+  # - Handwriting
+  # - HandMovementDirection
+  # - Heartbeat
+  # - JapaneseVowels
   - LSST
-  - Libras
-  - MotorImagery
-  - NATOPS
-  - PEMS-SF
-  - Phoneme
-  - RacketSports
-  - SelfRegulationSCP1
-  - SelfRegulationSCP2
-  - StandWalkJump
-  - SpokenArabicDigits
-  - UWaveGestureLibrary
+  # - Libras
+  # - MotorImagery
+  # - NATOPS
+  # - PEMS-SF
+  # - Phoneme
+  # - RacketSports
+  # - SelfRegulationSCP1
+  # - SelfRegulationSCP2
+  # - StandWalkJump
+  # - SpokenArabicDigits
+  # - UWaveGestureLibrary
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:

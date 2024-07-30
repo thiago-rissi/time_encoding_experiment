@@ -26,7 +26,10 @@ datasets:
   - SpokenArabicDigits
   - UWaveGestureLibrary
 models:
-  - RNNGRU
+  - RNNTimestamps
+  - RNNTimestampsDelta
+  - TransformerTimestamps
+  - TransformerTimestampsDelta
   # - RNN
   # - RNNTime2Vec
   # - RNNPos

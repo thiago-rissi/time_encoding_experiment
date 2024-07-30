@@ -11,6 +11,16 @@ import cupy as cp
 
 
 class MissForest:
+    """
+    MissForest is a class that performs missing value imputation using the MissForest algorithm.
+
+    Parameters:
+    - max_iter (int): The maximum number of iterations to perform.
+    - tol (float, optional): The tolerance for convergence. Defaults to 0.001.
+    - strategy (str, optional): The initial imputation strategy to use. Defaults to "mean".
+    - fill_values (float or None, optional): The value to fill missing values with. Defaults to None.
+    """
+
     def __init__(
         self,
         max_iter,
@@ -18,6 +28,15 @@ class MissForest:
         strategy: str = "mean",
         fill_values: float | None = None,
     ) -> None:
+        """
+        Initializes a new instance of the MissForest class.
+
+        Args:
+        - max_iter (int): The maximum number of iterations to perform.
+        - tol (float, optional): The tolerance for convergence. Defaults to 0.001.
+        - strategy (str, optional): The imputation strategy to use. Defaults to "mean".
+        - fill_values (float or None, optional): The value to fill missing values with. Defaults to None.
+        """
 
         self.regressor = XGBRegressor(random_state=42, device="cuda", n_jobs=-1)
         self.max_iter = max_iter
@@ -26,6 +45,15 @@ class MissForest:
         self.fill_value = fill_values
 
     def init_values(self, X: npt.NDArray) -> npt.NDArray:
+        """
+        Initializes the missing values in the input array.
+
+        Args:
+        - X (numpy.ndarray): The input array with missing values.
+
+        Returns:
+        - numpy.ndarray: The array with initialized missing values.
+        """
 
         imputer = SimpleImputer(strategy=self.strategy, fill_value=self.fill_value)
         X = imputer.fit_transform(X)
@@ -39,8 +67,22 @@ class MissForest:
         c: float,
         known_ids: npt.NDArray,
         nan_ids: npt.NDArray,
-        lenght: int,
+        length: int,
     ) -> npt.NDArray:
+        """
+        Performs a single step of the MissForest algorithm.
+
+        Args:
+        - X_ (numpy.ndarray): The input array with missing values.
+        - columns (set): The set of column indices.
+        - c (float): The current column index.
+        - known_ids (numpy.ndarray): The array indicating the known values in the current column.
+        - nan_ids (numpy.ndarray): The array indicating the missing values in the current column.
+        - length (int): The length of the input array.
+
+        Returns:
+        - numpy.ndarray: The updated array with imputed values.
+        """
 
         x_c = tuple(columns - {c})
         y = X_[known_ids, c]
@@ -49,7 +91,7 @@ class MissForest:
         regressor = self.regressor.fit(cp.array(x), cp.array(y))
 
         nan_length = sum(nan_ids)
-        id = random.randint(0, lenght - nan_length)
+        id = random.randint(0, length - nan_length)
         test_ids = np.arange(id, id + nan_length)
         x_test = X_[test_ids][:, x_c]
 
@@ -57,10 +99,33 @@ class MissForest:
         X_[nan_ids, c] = y_imp
 
     def calculate_epsilon(self, X_, X_old, X_0, known_ids) -> float:
+        """
+        Calculates the epsilon value for convergence.
+
+        Args:
+        - X_ (numpy.ndarray): The current array with imputed values.
+        - X_old (numpy.ndarray): The previous array with imputed values.
+        - X_0 (numpy.ndarray): The initial array with imputed values.
+        - known_ids (numpy.ndarray): The array indicating the known values in the input array.
+
+        Returns:
+        - float: The epsilon value.
+        """
+
         epsilon = np.max(np.abs(X_ - X_old)) / np.max(np.abs(X_0[known_ids]))
         return epsilon
 
     def fit_transform(self, X: npt.NDArray) -> npt.NDArray:
+        """
+        Fits the MissForest model to the input array and performs missing value imputation.
+
+        Args:
+        - X (numpy.ndarray): The input array with missing values.
+
+        Returns:
+        - numpy.ndarray: The array with imputed values.
+        """
+
         n_iter = 0
         known_ids = ~np.isnan(X)
         nan_ids = np.isnan(X)
@@ -94,14 +159,32 @@ def create_nan_ts(
     window_mean: float = 0.1,
     window_std: float = 0.02,
 ) -> npt.NDArray:
-    miss_points = 0
+    """
+    Creates a time series with missing values (NaNs) based on the given parameters.
+
+    Args:
+        ts (npt.NDArray): The input time series.
+        pmiss (float): The desired proportion of missing values in the output time series.
+        strategy (str, optional): The strategy to use for inserting missing values.
+            Can be either "same" or "diff". Defaults to "same".
+        tol (float, optional): The tolerance for the proportion of missing values.
+            If the actual proportion is within tol of pmiss, no additional values will be removed.
+            Defaults to 0.025.
+        window_mean (float, optional): The mean of the normal distribution used to determine
+            the number of values to insert. Defaults to 0.1.
+        window_std (float, optional): The standard deviation of the normal distribution used
+            to determine the number of values to insert. Defaults to 0.02.
+
+    Returns:
+        npt.NDArray: The time series with missing values (NaNs) inserted.
+    """
     total_points = len(ts)
     mean = window_mean * total_points
     std = window_std * total_points
-    n_insert = int(np.random.normal(mean, std))
+    n_insert = max(int(np.random.normal(mean, std)), 1)
     mask = np.zeros(total_points)
 
-    pmiss_ = miss_points / total_points
+    pmiss_ = sum(mask) / total_points
     while pmiss_ < pmiss:
         id_insert = random.randint(0, total_points - 1)
         mask[id_insert : id_insert + n_insert] = 1
@@ -129,7 +212,25 @@ def create_nan_dataset(
     window_mean: float = 0.1,
     window_std: float = 0.02,
 ):
+    """
+    Create a dataset with missing values (NaNs) based on the given parameters.
 
+    Args:
+        X (numpy.ndarray): The input dataset of shape (n_instances, n_variables).
+        pmiss (float): The proportion of missing values to be generated.
+        n_instances (int): The number of instances in the dataset.
+        n_variables (int): The number of variables in the dataset.
+        nan_strategy (str, optional): The strategy to generate missing values.
+            Can be either "same" or "diff". Defaults to "same".
+        window_mean (float, optional): The mean of the window size used for generating missing values.
+            Only applicable when nan_strategy is "same". Defaults to 0.1.
+        window_std (float, optional): The standard deviation of the window size used for generating missing values.
+            Only applicable when nan_strategy is "same". Defaults to 0.02.
+
+    Returns:
+        numpy.ndarray: The dataset with missing values (NaNs) of shape (n_instances, n_variables).
+
+    """
     xs_nan = []
     for i in range(n_instances):
         x_i = X[i]
@@ -162,7 +263,18 @@ def impute(
     n_instances: int,
     imputer: MissForest | IterativeImputer | Any,
 ) -> npt.NDArray:
+    """
+    Imputes missing values in the input array using the specified imputer.
 
+    Args:
+        X_nan (npt.NDArray): The input array with missing values.
+        n_instances (int): The number of instances in the input array.
+        imputer (MissForest | IterativeImputer | Any): The imputer object used for imputation.
+
+    Returns:
+        npt.NDArray: The imputed array with missing values filled.
+
+    """
     xs = []
     for i in tqdm(range(n_instances)):
         x_i_nan = X_nan[i]

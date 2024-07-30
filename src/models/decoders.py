@@ -10,6 +10,24 @@ import math
 
 
 class LinearDecoder(nn.Module):
+    """
+    LinearDecoder module that performs linear decoding for classification tasks.
+
+    Args:
+        num_classes (int): The number of output classes.
+        hidden_size (int): The size of the hidden layer.
+        **kwargs: Additional keyword arguments.
+
+    Attributes:
+        internal_linear (nn.Linear): The internal linear layer.
+        relu (nn.ReLU): The ReLU activation function.
+        projective_linear (nn.Linear): The projective linear layer.
+
+    Methods:
+        forward(x): Performs forward pass through the decoder.
+
+    """
+
     def __init__(self, num_classes, hidden_size: int, **kwargs) -> None:
         super().__init__()
 
@@ -18,6 +36,16 @@ class LinearDecoder(nn.Module):
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Performs forward pass through the decoder.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The output tensor.
+
+        """
         out = self.internal_linear(x)
         out = self.relu(out)
         y_hat = self.projective_linear(out)
@@ -26,6 +54,24 @@ class LinearDecoder(nn.Module):
 
 
 class LinearDecoderV2(nn.Module):
+    """
+    LinearDecoderV2 is a class that represents a linear decoder model.
+
+    Args:
+        num_classes (int): The number of output classes.
+        hidden_size (int): The size of the hidden layer.
+        dropout (float): The dropout rate.
+        **kwargs: Additional keyword arguments.
+
+    Attributes:
+        bn1 (nn.BatchNorm1d): Batch normalization layer.
+        bn2 (nn.BatchNorm1d): Batch normalization layer.
+        internal_linear (nn.Linear): Linear layer for internal processing.
+        dropout (nn.Dropout): Dropout layer.
+        relu (nn.ReLU): ReLU activation function.
+        projective_linear (nn.Linear): Linear layer for projecting to output classes.
+    """
+
     def __init__(self, num_classes, hidden_size: int, dropout: float, **kwargs) -> None:
         super().__init__()
         self.bn1 = nn.BatchNorm1d(hidden_size)
@@ -37,6 +83,15 @@ class LinearDecoderV2(nn.Module):
         self.projective_linear = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the LinearDecoderV2 model.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         if len(x.shape) == 1:
             x = x.unsqueeze(0)
         x_internal = self.bn1(x)

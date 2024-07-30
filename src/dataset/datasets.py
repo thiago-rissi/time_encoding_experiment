@@ -13,6 +13,16 @@ def sample_random_t_inference(
     min_timestamp: float,
     max_timestamp: float,
 ) -> torch.Tensor:
+    """
+    Generate a random timestamp for inference within the given range.
+
+    Args:
+        min_timestamp (float): The minimum timestamp value.
+        max_timestamp (float): The maximum timestamp value.
+
+    Returns:
+        torch.Tensor: A randomly generated timestamp for inference.
+    """
     base_random = torch.rand(1)
 
     lbound = min_timestamp

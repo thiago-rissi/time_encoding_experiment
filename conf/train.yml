@@ -27,7 +27,7 @@ datasets:
   - UWaveGestureLibrary
 
 models:
-  - RNNGRU
+  # - RNNGRU
   # - RNN
   # - RNNTime2Vec
   # - RNNPos
@@ -37,6 +37,10 @@ models:
   # - RNNPosDelta
   # - RNNtPosDelta
   # - RNNLinearDelta
+  - RNNTimestamps
+  - RNNTimestampsDelta
+  - TransformerTimestamps
+  - TransformerTimestampsDelta
   # - Transformer
   # - TransformerTime2Vec
   # - TransformerPos
