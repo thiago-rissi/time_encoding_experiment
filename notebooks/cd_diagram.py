@@ -342,8 +342,10 @@ def draw_cd_diagram(metric: str, df_perf=None, alpha=0.05, title=None, labels=Fa
         metric=metric, df_perf=df_perf, alpha=alpha
     )
 
+    print("Average ranks")
     print(average_ranks)
 
+    print("P-values")
     for p in p_values:
         print(p)
 
@@ -395,7 +397,7 @@ def wilcoxon_holm(metric: str, alpha=0.05, df_perf=None):
     if friedman_p_value >= alpha:
         # then the null hypothesis over the entire classifiers cannot be rejected
         print("the null hypothesis over the entire classifiers cannot be rejected")
-        # exit()
+        exit()
 
     # get the number of classifiers
     m = len(classifiers)

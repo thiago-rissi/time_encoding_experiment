@@ -49,7 +49,15 @@ def calculate_metrics(
 
         pmiss_result[pmisses[i]] = models_pmiss
 
-    return results, model_mean, pmiss_result
+    datasets_results = {}
+    for dataset in datasets:
+        models_results = {}
+        for model in models:
+            test = f"{model}_{dataset}"
+            models_results[model] = results[test]
+        datasets_results[dataset] = models_results
+
+    return results, model_mean, pmiss_result, datasets_results
 
 
 def gather_metric_cd(

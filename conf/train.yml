@@ -30,12 +30,12 @@ models:
   # - RNNGRU
   # - RNN
   # - RNNTime2Vec
-  # - RNNPos
-  # - RNNtPos
+  # - RNNPE
+  # - RNNTPE
   # - RNNLinear
   # - RNNTime2VecDelta
-  # - RNNPosDelta
-  # - RNNtPosDelta
+  # - RNNPEDelta
+  # - RNNTPEDelta
   # - RNNLinearDelta
   - RNNTimestamps
   - RNNTimestampsDelta
@@ -43,12 +43,12 @@ models:
   - TransformerTimestampsDelta
   # - Transformer
   # - TransformerTime2Vec
-  # - TransformerPos
-  # - TransformertPos
+  # - TransformerPE
+  # - TransformerTPE
   # - TransformerLinear
   # - TransformerTime2VecDelta
-  # - TransformerPosDelta
-  # - TransformertPosDelta
+  # - TransformerPEDelta
+  # - TransformerTPEDelta
   # - TransformerLinearDelta
   # - RidgeClassifier
   # - CanonicalIntervalForest

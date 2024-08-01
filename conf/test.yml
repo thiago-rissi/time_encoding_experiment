@@ -32,23 +32,23 @@ models:
   - TransformerTimestampsDelta
   # - RNN
   # - RNNTime2Vec
-  # - RNNPos
-  # - RNNtPos
+  # - RNNPE
+  # - RNNTPE
   # - RNNLinear
   # - RNNDelta
   # - RNNTime2VecDelta
-  # - RNNPosDelta
-  # - RNNtPosDelta
+  # - RNNPEDelta
+  # - RNNTPEDelta
   # - RNNLinearDelta
   # - Transformer
   # - TransformerTime2Vec
-  # - TransformerPos
-  # - TransformertPos
+  # - TransformerPE
+  # - TransformerTPE
   # - TransformerLinear
   # - TransformerDelta
   # - TransformerTime2VecDelta
-  # - TransformerPosDelta
-  # - TransformertPosDelta
+  # - TransformerPEDelta
+  # - TransformerTPEDelta
   # - TransformerLinearDelta
   # - RidgeClassifier
   # - CanonicalIntervalForest
