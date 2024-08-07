@@ -47,7 +47,7 @@ class TransformerTorch(nn.Module):
 
         encoder_layer = TransformerEncoderLayer(
             batch_first=batch_first,
-            d_model=hidden_size,
+            d_model=d_model,
             nhead=4,
         )
         self.encoder = TransformerEncoder(
