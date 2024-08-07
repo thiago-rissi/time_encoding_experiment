@@ -56,7 +56,7 @@ torch_tester:
   loss: CrossEntropyLoss
   batch_size: 10
   base_path: data/outputs
-  inf_sample_size: 10
+  inf_sample_size: 1
 general_tester:
   base_path: data/outputs
   add_encoding: false

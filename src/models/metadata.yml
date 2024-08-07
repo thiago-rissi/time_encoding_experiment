@@ -1,11 +1,11 @@
 Encoder:
-  hidden_size: 200
+  hidden_size: 400
   num_layers: 1
   batch_first: True
   input_size: 200
  
 Decoder:
-  hidden_size: 200
+  hidden_size: 400
 
 RNN:
   torch: true
@@ -40,7 +40,7 @@ RNNTime2Vec:
     dropout: 0.1
   decoder_class: LinearDecoder
   
-RNNPos:
+RNNPE:
   torch: true
   test_nan: true
   encoder_class: RNN
@@ -51,7 +51,7 @@ RNNPos:
     dropout: 0.1
   decoder_class: LinearDecoder
  
-RNNtPos:
+RNNTPE:
   torch: true
   test_nan: true
   encoder_class: RNN
@@ -84,7 +84,7 @@ RNNTime2VecDelta:
     dropout: 0.1
   decoder_class: LinearDecoder
   
-RNNPosDelta:
+RNNPEDelta:
   torch: true
   test_nan: true
   encoder_class: RNN
@@ -106,7 +106,7 @@ RNNTimestampsDelta:
     dropout: 0.1
   decoder_class: LinearDecoder
 
-RNNtPosDelta:
+RNNTPEDelta:
   torch: true
   test_nan: true
   encoder_class: RNN
@@ -150,7 +150,7 @@ TransformerTimestamps:
     dropout: 0.1
   decoder_class: LinearDecoder
 
-TransformerPos:
+TransformerPE:
   torch: true
   test_nan: true
   encoder_class: TransformerTorch
@@ -172,7 +172,7 @@ TransformerLinear:
     dropout: 0.1
   decoder_class: LinearDecoder
 
-TransformertPos:
+TransformerTPE:
   torch: true
   test_nan: true
   encoder_class: TransformerTorch
@@ -206,7 +206,7 @@ TransformerTimestampsDelta:
   decoder_class: LinearDecoder
 
 
-TransformerPosDelta:
+TransformerPEDelta:
   torch: true
   test_nan: true
   encoder_class: TransformerTorch
@@ -228,7 +228,7 @@ TransformerLinearDelta:
     dropout: 0.1
   decoder_class: LinearDecoder
 
-TransformertPosDelta:
+TransformerTPEDelta:
   torch: true
   test_nan: true
   encoder_class: TransformerTorch

@@ -43,6 +43,8 @@ class TransformerTorch(nn.Module):
     ) -> None:
         super().__init__()
 
+        d_model = input_size
+
         encoder_layer = TransformerEncoderLayer(
             batch_first=batch_first,
             d_model=hidden_size,
@@ -52,6 +54,13 @@ class TransformerTorch(nn.Module):
             encoder_layer=encoder_layer,
             num_layers=num_layers,
         )
+
+        self.linear = nn.Linear(
+            in_features=d_model,
+            out_features=hidden_size,
+        )
+
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         """
@@ -66,9 +75,11 @@ class TransformerTorch(nn.Module):
 
         """
         X_encoded = self.encoder(X)
-        X_hidden = X_encoded[:, -1]
+        X_encoded = self.dropout(X_encoded)
+        X_mean = X_encoded[:, -1]
+        X_linear = self.linear(X_mean)
 
-        return X_hidden
+        return X_linear
 
 
 class RNN(nn.Module):
