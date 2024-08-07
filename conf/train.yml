@@ -1,55 +1,43 @@
 datasets:
-  - AtrialFibrillation
   - ArticularyWordRecognition
   - BasicMotions
   - Cricket
-  - DuckDuckGeese
   - ERing
   - Epilepsy
-  - EigenWorms
-  - EthanolConcentration
-  - FingerMovements
-  - Handwriting
-  - HandMovementDirection
   - Heartbeat
   - JapaneseVowels
   - LSST
   - Libras
-  - MotorImagery
   - NATOPS
   - PEMS-SF
-  - Phoneme
   - RacketSports
   - SelfRegulationSCP1
-  - SelfRegulationSCP2
-  - StandWalkJump
   - SpokenArabicDigits
   - UWaveGestureLibrary
 
 models:
-  # - RNNGRU
-  # - RNN
-  # - RNNTime2Vec
-  # - RNNPE
-  # - RNNTPE
-  # - RNNLinear
-  # - RNNTime2VecDelta
-  # - RNNPEDelta
-  # - RNNTPEDelta
-  # - RNNLinearDelta
+  - RNN
+  - RNNTime2Vec
+  - RNNPE
+  - RNNTPE
+  - RNNLinear
+  - RNNTime2VecDelta
+  - RNNPEDelta
+  - RNNTPEDelta
+  - RNNLinearDelta
   - RNNTimestamps
   - RNNTimestampsDelta
   - TransformerTimestamps
   - TransformerTimestampsDelta
-  # - Transformer
-  # - TransformerTime2Vec
-  # - TransformerPE
-  # - TransformerTPE
-  # - TransformerLinear
-  # - TransformerTime2VecDelta
-  # - TransformerPEDelta
-  # - TransformerTPEDelta
-  # - TransformerLinearDelta
+  - Transformer
+  - TransformerTime2Vec
+  - TransformerPE
+  - TransformerTPE
+  - TransformerLinear
+  - TransformerTime2VecDelta
+  - TransformerPEDelta
+  - TransformerTPEDelta
+  - TransformerLinearDelta
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2

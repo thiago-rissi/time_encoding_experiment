@@ -47,7 +47,7 @@ def plot_metric(
     for name, result in results.items():
         ax.plot(pmiss, result, label=name)
 
-    ax.set_xlabel("Missing percentage")
+    ax.set_xlabel("Missing percentage (%)")
     ax.set_ylabel(metric)
     ax.set_title(title)
     ax.grid()

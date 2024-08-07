@@ -1,12 +1,11 @@
 Encoder:
-  hidden_size: 400
+  hidden_size: 200
   num_layers: 1
   batch_first: True
   input_size: 200
  
 Decoder:
-  hidden_size: 400
-  dropout: 0.1
+  hidden_size: 200
 
 RNN:
   torch: true
