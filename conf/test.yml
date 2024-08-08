@@ -16,30 +16,28 @@ datasets:
   - UWaveGestureLibrary
 
 models:
-  - RNNTimestamps
-  - RNNTimestampsDelta
-  - TransformerTimestamps
-  - TransformerTimestampsDelta
   - RNN
   - RNNTime2Vec
   - RNNPE
   - RNNTPE
   - RNNLinear
-  - RNNDelta
-  - RNNTime2VecDelta
-  - RNNPEDelta
-  - RNNTPEDelta
-  - RNNLinearDelta
+  - RNNTime2VecRel
+  - RNNPERel
+  - RNNTPERel
+  - RNNLinearRel
+  - RNNTimestamps
+  - RNNTimestampsRel
+  - TransformerTimestamps
+  - TransformerTimestampsRel
   - Transformer
   - TransformerTime2Vec
   - TransformerPE
   - TransformerTPE
   - TransformerLinear
-  - TransformerDelta
-  - TransformerTime2VecDelta
-  - TransformerPEDelta
-  - TransformerTPEDelta
-  - TransformerLinearDelta
+  - TransformerTime2VecRel
+  - TransformerPERel
+  - TransformerTPERel
+  - TransformerLinearRel
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2

@@ -21,23 +21,23 @@ models:
   - RNNPE
   - RNNTPE
   - RNNLinear
-  - RNNTime2VecDelta
-  - RNNPEDelta
-  - RNNTPEDelta
-  - RNNLinearDelta
+  - RNNTime2VecRel
+  - RNNPERel
+  - RNNTPERel
+  - RNNLinearRel
   - RNNTimestamps
-  - RNNTimestampsDelta
+  - RNNTimestampsRel
   - TransformerTimestamps
-  - TransformerTimestampsDelta
+  - TransformerTimestampsRel
   - Transformer
   - TransformerTime2Vec
   - TransformerPE
   - TransformerTPE
   - TransformerLinear
-  - TransformerTime2VecDelta
-  - TransformerPEDelta
-  - TransformerTPEDelta
-  - TransformerLinearDelta
+  - TransformerTime2VecRel
+  - TransformerPERel
+  - TransformerTPERel
+  - TransformerLinearRel
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2

@@ -135,7 +135,9 @@ class TSEncoder(nn.Module):
         X = X.swapaxes(1, 2)
 
         if self.time_encoder is not None:
-            timestamps = min_max_norm(timestamps)
+            if self.time_encoding_class in ["Timestamps", "Linear"]:
+                timestamps = min_max_norm(timestamps)
+
             if self.unsqueeze_timestamps:
                 timestamps = timestamps.unsqueeze(-1)
 
