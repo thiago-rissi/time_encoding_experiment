@@ -19,3 +19,4 @@ sktime-dl
 cupy-cuda12x
 xgboost
 einops
+openpyxl
