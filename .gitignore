@@ -75,10 +75,6 @@ docs/_build/
 .pybuilder/
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-notebooks/plots/
-notebooks/real_data_regression
 # IPython
 profile_default/
 ipython_config.py
@@ -161,17 +157,7 @@ cython_debug/
 #.idea/
 
 .env/
-/*.out
-data/
 .vscode/
-scripts/script_data
-wandb/
-notebooks/classification_results
-notebooks/regression_results
-notebooks/real_data_results
-notebooks/loss_graph
-
-src/api/*/*.pt
 .dot
 .prof
 .svg
