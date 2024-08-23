@@ -1,25 +1,43 @@
 datasets:
+  - ArticularyWordRecognition
+  - BasicMotions
+  - Cricket
   - ERing
   - Epilepsy
   - Heartbeat
-  - UWaveGestureLibrary
-  - ArticularyWordRecognition
-  - EthanolConcentration
+  - JapaneseVowels
+  - LSST
   - Libras
-  - AsphaltPavementTypeCoordinates
-  - FingerMovements
-  - Handwriting
+  - NATOPS
+  - PEMS-SF
+  - RacketSports
+  - SelfRegulationSCP1
+  - SpokenArabicDigits
+  - UWaveGestureLibrary
+
 models:
-  # - TSCRNNRel
-  # - TSCRNNAbs
-  # - TSCRNNTimestamps
-  # - TSCRNN
-  - TSCRNNTime2Vec
-  # - TSCTransformerRel
-  # - TSCTransformerAbs
-  # - TSCTransformerTimestamps
-  # - TSCTransformer
-  - TSCTransformerTime2Vec
+  - RNN
+  - RNNTime2Vec
+  - RNNPE
+  - RNNTPE
+  - RNNLinear
+  - RNNTime2VecRel
+  - RNNPERel
+  - RNNTPERel
+  - RNNLinearRel
+  - RNNTimestamps
+  - RNNTimestampsRel
+  - TransformerTimestamps
+  - TransformerTimestampsRel
+  - Transformer
+  - TransformerTime2Vec
+  - TransformerPE
+  - TransformerTPE
+  - TransformerLinear
+  - TransformerTime2VecRel
+  - TransformerPERel
+  - TransformerTPERel
+  - TransformerLinearRel
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
@@ -36,7 +54,7 @@ torch_tester:
   loss: CrossEntropyLoss
   batch_size: 10
   base_path: data/outputs
-  inf_sample_size: 10
+  inf_sample_size: 1
 general_tester:
   base_path: data/outputs
   add_encoding: false

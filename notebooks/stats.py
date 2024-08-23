@@ -49,7 +49,15 @@ def calculate_metrics(
 
         pmiss_result[pmisses[i]] = models_pmiss
 
-    return results, model_mean, pmiss_result
+    datasets_results = {}
+    for dataset in datasets:
+        models_results = {}
+        for model in models:
+            test = f"{model}_{dataset}"
+            models_results[model] = results[test]
+        datasets_results[dataset] = models_results
+
+    return results, model_mean, pmiss_result, datasets_results
 
 
 def gather_metric_cd(
@@ -61,19 +69,31 @@ def gather_metric_cd(
     pmiss: int,
     func_params: dict | None = None,
 ) -> pd.DataFrame:
-    results = {"classifier_name": [], "dataset_name": [], metric_name: []}
-    for dataset, model in product(datasets, models):
-        df_path = base_path / f"{model}_{dataset}_{pmiss}.parquet"
-        df = pl.read_parquet(df_path)
+    results = {}
+    for model in models:
+        results[model] = {}
+        for dataset in datasets:
+            df_path = base_path / f"{model}_{dataset}_{pmiss}.parquet"
+            df = pl.read_parquet(df_path)
+            if func_params == None:
+                metric = func_metric(df["y_hat"], df["y"])
+            else:
+                metric = func_metric(df["y_hat"], df["y"], **func_params)
+            results[model][dataset] = metric
 
-        if func_params == None:
-            metric = func_metric(df["y_hat"], df["y"])
-        else:
-            metric = func_metric(df["y_hat"], df["y"], **func_params)
+    # results = {"classifier_name": [], "dataset_name": [], metric_name: []}
+    # for dataset, model in product(datasets, models):
+    #     df_path = base_path / f"{model}_{dataset}_{pmiss}.parquet"
+    #     df = pl.read_parquet(df_path)
 
-        results["classifier_name"].append(model)
-        results["dataset_name"].append(dataset)
-        results[metric_name].append(metric)
+    #     if func_params == None:
+    #         metric = func_metric(df["y_hat"], df["y"])
+    #     else:
+    #         metric = func_metric(df["y_hat"], df["y"], **func_params)
+
+    #     results["classifier_name"].append(model)
+    #     results["dataset_name"].append(dataset)
+    #     results[metric_name].append(metric)
 
     df = pd.DataFrame(results)
 

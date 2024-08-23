@@ -5,14 +5,24 @@ from dataset.utils import *
 import pathlib
 import numpy as np
 import pickle
-from models.time_encoder import PositionalEncoding
-from pre_process_code.rocket import apply_rocket
+from models.time_encoders import PositionalEncoding
+from pre_process_node.rocket import apply_rocket
 
 
 def sample_random_t_inference(
     min_timestamp: float,
     max_timestamp: float,
 ) -> torch.Tensor:
+    """
+    Generate a random timestamp for inference within the given range.
+
+    Args:
+        min_timestamp (float): The minimum timestamp value.
+        max_timestamp (float): The maximum timestamp value.
+
+    Returns:
+        torch.Tensor: A randomly generated timestamp for inference.
+    """
     base_random = torch.rand(1)
 
     lbound = min_timestamp
@@ -139,7 +149,7 @@ class TorchDataset:
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
         t_inf = 0.0
-        if self.time_encoding_strategy == "relative":
+        if self.time_encoding_strategy == "delta":
             t_inf = sample_random_t_inference(
                 min_timestamp=0.0,
                 max_timestamp=self.timestamps.max().item(),

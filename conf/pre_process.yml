@@ -1,37 +1,64 @@
+impute: false
 imputer_name: MissForest
 primary_path: data/primary
 feature_path: data/feature
 datasets:
-  - ERing
-  - Epilepsy
-  - Heartbeat
-  - UWaveGestureLibrary
-  - ArticularyWordRecognition
-  - EthanolConcentration
-  - Libras
-  - AsphaltPavementTypeCoordinates
-  - FingerMovements
-  - Handwriting
+  # - AtrialFibrillation
+  # - ArticularyWordRecognition
+  # - BasicMotions
+  # - Cricket
+  # - DuckDuckGeese
+  # - ERing
+  # - Epilepsy
+  # - EigenWorms
+  # - EthanolConcentration
+  # - FingerMovements
+  # - Handwriting
+  # - HandMovementDirection
+  # - Heartbeat
+  # - JapaneseVowels
+  - LSST
+  # - Libras
+  # - MotorImagery
+  # - NATOPS
+  # - PEMS-SF
+  # - Phoneme
+  # - RacketSports
+  # - SelfRegulationSCP1
+  # - SelfRegulationSCP2
+  # - StandWalkJump
+  # - SpokenArabicDigits
+  # - UWaveGestureLibrary
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:
   AsphaltPavementTypeCoordinates: same
-  Heartbeat: same
-  LSST: same
-  UWaveGestureLibrary: same
+  AtrialFibrillation: same
   ArticularyWordRecognition: same
+  BasicMotions: same
   Cricket: same
   DuckDuckGeese: same
-  EthanolConcentration: same
-  Libras: same
-  NATOPS: same
   ERing: same
   Epilepsy: same
-  BasicMotions: same
-  SelfRegulationSCP1: same
+  EigenWorms: same
+  EthanolConcentration: same
   FingerMovements: same
-  PenDigits: same
   Handwriting: same
+  HandMovementDirection: same
+  Heartbeat: same
+  JapaneseVowels: same
+  LSST: same
+  Libras: same
+  MotorImagery: same
+  NATOPS: same
+  PEMS-SF: same
+  Phoneme: same
+  RacketSports: same
+  SelfRegulationSCP1: same
+  SelfRegulationSCP2: same
+  StandWalkJump: same
+  SpokenArabicDigits: same
+  UWaveGestureLibrary: same
 pmiss_list:
   - 0.2
   - 0.4
@@ -40,3 +67,5 @@ pmiss_list:
   - 0.8
   - 0.9
 process_train: true
+window_mean: 0.1
+window_std: 0.02

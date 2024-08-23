@@ -3,7 +3,7 @@ import pathlib
 import yaml
 import sys
 
-from train_code.utils import train
+from train_node.train_node import train
 
 
 def parse_args(args: list[str]) -> argparse.Namespace:

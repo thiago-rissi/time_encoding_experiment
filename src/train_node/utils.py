@@ -3,7 +3,7 @@ import torch
 import sys
 from models.ts_classifier import TSClassifier  # , TSAREncoderDecoder
 from models.resnet import ResNet50
-from train_code.trainers import *
+from train_node.trainers import *
 from dataset.utils import *
 from dataset.datasets import *
 from sklearn.linear_model import RidgeClassifier
@@ -20,11 +20,13 @@ def torch_train_step(
     model_name: str,
     datasets_config: dict,
     config: dict,
+    encoder: dict,
+    decoder: dict,
     torch_trainer: dict,
     device: torch.device,
 ) -> None:
 
-    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+    time_encoding_strategy = config["time_encoding"]["strategy"]
 
     class_trainer_config = torch_trainer["classification_training"]
     dataset = TorchDataset(
@@ -39,7 +41,9 @@ def torch_train_step(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        **config,
+        ts_encoding=encoder,
+        decoder=decoder,
+        model_config=config,
     )
 
     trainer = TorchTrainer(model=model, **class_trainer_config)
@@ -107,41 +111,3 @@ def general_train_step(
         save_path = pathlib.Path(base_path) / (f"{model_name}_{dataset_name}.pkl")
         with open(save_path, "wb") as f:
             pickle.dump(model, f)
-
-
-def train(
-    models_config: dict,
-    datasets_config: dict,
-    torch_trainer: dict,
-    general_trainer: dict,
-    datasets: list[str],
-    models: list[str],
-):
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_path = pathlib.Path("data/feature")
-    for model_name in models:
-        config = models_config[model_name]
-        print(f"Training model: {model_name}")
-        for dataset_name in datasets:
-            print(f"---> Dataset: {dataset_name}")
-            dataset_path = (base_path / dataset_name) / "0_missing"
-
-            if config["torch"]:
-                torch_train_step(
-                    dataset_path,
-                    dataset_name,
-                    model_name,
-                    datasets_config,
-                    config,
-                    torch_trainer,
-                    device,
-                )
-            else:
-                general_train_step(
-                    dataset_path,
-                    dataset_name,
-                    model_name,
-                    config,
-                    general_trainer,
-                )

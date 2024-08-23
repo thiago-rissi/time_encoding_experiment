@@ -41,13 +41,22 @@ def plot_metric(
     metric: str,
     pmiss: list = [0, 20, 40, 60, 70, 80, 90],
     title: str = "",
+    save_name: str = "output",
 ) -> None:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 6))
     for name, result in results.items():
         ax.plot(pmiss, result, label=name)
 
-    ax.set_xlabel("Missing percentage")
+    ax.set_xlabel("Missing percentage (%)")
     ax.set_ylabel(metric)
     ax.set_title(title)
     ax.grid()
-    ax.legend()
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.15),
+        fancybox=True,
+        shadow=True,
+        ncol=2,
+    )
+    plt.tight_layout()
+    plt.savefig(f"../notebooks/figures/{save_name}.png")

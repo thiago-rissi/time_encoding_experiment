@@ -5,7 +5,7 @@ import yaml
 import uniplot
 from dataset.utils import *
 from dataset.datasets import *
-from test_code.testers import *
+from test_node.testers import *
 import os
 from models.ts_classifier import TSClassifier  # TSAREncoderDecoder,
 from sktime.classification.deep_learning import ResNetClassifier
@@ -18,10 +18,6 @@ def load_model(
         list(pathlib.Path(model_basepath).rglob("*best.pkl")),
         key=lambda x: int(x.stem.split("_")[-2]),
     )[-1]
-    # model_path = list(pathlib.Path(model_basepath).rglob("*.pkl"))[-1]
-    # model_path = pathlib.Path(
-    #     "data/models/TSClassifierTransformer/EthanolConcentration/model_20.pkl"
-    # )
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
@@ -32,6 +28,8 @@ def torch_test_step(
     pmiss: float,
     model_name: str,
     config: dict,
+    encoder: dict,
+    decoder: dict,
     datasets_config: dict,
     torch_tester: dict,
     device: torch.device,
@@ -43,7 +41,7 @@ def torch_test_step(
         else pmiss_path / f"{dataset_name}_{int(100*pmiss)}.ts"
     )
 
-    time_encoding_strategy = config["encoder"]["time_encoding"]["strategy"]
+    time_encoding_strategy = config["time_encoding"]["strategy"]
 
     dataset = TorchDataset(
         dataset_path=test_path,
@@ -57,7 +55,9 @@ def torch_test_step(
         num_classes=dataset.num_classes,
         num_features=dataset.n_variables,
         t_length=dataset.t_length,
-        **config,
+        ts_encoding=encoder,
+        decoder=decoder,
+        model_config=config,
     )
 
     model = load_model(
@@ -128,62 +128,3 @@ def general_step_tester(
 
     results.write_parquet(save_path)
     return acc
-
-
-def test(
-    datasets: list[str],
-    models: list[str],
-    pmisses: list[float],
-    models_config: dict,
-    datasets_config: dict,
-    torch_tester: dict,
-    general_tester: dict,
-) -> None:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_path = pathlib.Path("data/feature")
-    all_results = {}
-    for model_name in models:
-        print(f"Testing model: {model_name}")
-
-        if "TSClassifier" in model_name:
-            with open(f"data/models/{model_name}/model.yml", "r") as f:
-                config = yaml.safe_load(f)
-        else:
-            config = models_config[model_name]
-
-        for dataset_name in datasets:
-            print(f"---> Dataset: {dataset_name}")
-            dataset_path = base_path / dataset_name
-            all_miss = []
-            for pmiss in pmisses:
-                print(f"---> Missing percentage: {int(100*pmiss)}")
-                pmiss_path = dataset_path / f"{int(100*pmiss)}_missing"
-
-                if config["torch"]:
-                    acc = torch_test_step(
-                        pmiss_path,
-                        dataset_name,
-                        pmiss,
-                        model_name,
-                        config,
-                        datasets_config,
-                        torch_tester,
-                        device,
-                        torch_tester["inf_sample_size"],
-                    )
-                    all_miss.append(acc)
-                else:
-                    acc = general_step_tester(
-                        pmiss_path,
-                        dataset_name,
-                        pmiss,
-                        model_name,
-                        config,
-                        general_tester,
-                    )
-                    all_miss.append(acc)
-
-            uniplot.plot(
-                xs=[pmisses],
-                ys=[all_miss],
-            )
