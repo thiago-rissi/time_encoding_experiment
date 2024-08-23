@@ -14,6 +14,25 @@ import polars as pl
 
 
 class TorchTester:
+    """
+    A class for testing a PyTorch model.
+
+    Args:
+        model (nn.Module): The PyTorch model to be tested.
+        model_name (str): The name of the model.
+        loss (str): The name of the loss function to be used.
+
+    Attributes:
+        model (nn.Module): The PyTorch model to be tested.
+        model_name (str): The name of the model.
+        loss_func: The loss function to be used.
+
+    Methods:
+        predict(X, y, timestamps): Predicts the output and calculates the loss for a given input.
+        test(dataset, device, save_path, inf_sample_size, num_workers, **kwargs): Tests the model on a dataset and returns the accuracy.
+
+    """
+
     def __init__(
         self,
         model: nn.Module,

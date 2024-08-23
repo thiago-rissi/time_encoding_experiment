@@ -9,7 +9,20 @@ def train(
     datasets: list[str],
     models: list[str],
 ):
+    """
+    Train the specified models on the given datasets.
 
+    Args:
+        models_config (dict): A dictionary containing the configuration for each model.
+        datasets_config (dict): A dictionary containing the configuration for each dataset.
+        torch_trainer (dict): A dictionary containing the configuration for the torch trainer.
+        general_trainer (dict): A dictionary containing the configuration for the general trainer.
+        datasets (list[str]): A list of dataset names to train on.
+        models (list[str]): A list of model names to train.
+
+    Returns:
+        None
+    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_path = pathlib.Path("data/feature")
     for model_name in models:

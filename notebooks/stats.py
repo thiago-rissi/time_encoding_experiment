@@ -13,8 +13,25 @@ def calculate_metrics(
     models: list[str],
     pmisses: list[int],
     func_params: dict | None = None,
-) -> dict[str, list[float]]:
+) -> tuple[dict, dict, dict, dict]:
+    """
+    Calculate metrics for given datasets and models.
 
+    Args:
+        func_metric (Any): The metric function to calculate.
+        base_path (pathlib.Path): The base path where the datasets are located.
+        datasets (list[str]): The list of dataset names.
+        models (list[str]): The list of model names.
+        pmisses (list[int]): The list of pmiss values.
+        func_params (dict | None, optional): Additional parameters for the metric function. Defaults to None.
+
+    Returns:
+        tuple[dict, dict, dict, dict]: A tuple containing the following:
+            - results (dict): The calculated metrics for each combination of dataset and model.
+            - model_mean (dict): The mean metric values for each model.
+            - pmiss_result (dict): The metric values for each pmiss value and model.
+            - datasets_results (dict): The metric values for each dataset and model.
+    """
     results = {}
     for dataset, model in product(datasets, models):
         metric_pmiss = np.empty(shape=len(pmisses))
@@ -69,6 +86,21 @@ def gather_metric_cd(
     pmiss: int,
     func_params: dict | None = None,
 ) -> pd.DataFrame:
+    """
+    Calculate the specified metric for different models and datasets.
+
+    Args:
+        func_metric (Any): The metric function to be used.
+        metric_name (str): The name of the metric.
+        base_path (pathlib.Path): The base path where the data files are located.
+        datasets (list[str]): The list of dataset names.
+        models (list[str]): The list of model names.
+        pmiss (int): The value of pmiss.
+        func_params (dict | None, optional): Additional parameters for the metric function. Defaults to None.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the calculated metric values for each model and dataset.
+    """
     results = {}
     for model in models:
         results[model] = {}
@@ -80,20 +112,6 @@ def gather_metric_cd(
             else:
                 metric = func_metric(df["y_hat"], df["y"], **func_params)
             results[model][dataset] = metric
-
-    # results = {"classifier_name": [], "dataset_name": [], metric_name: []}
-    # for dataset, model in product(datasets, models):
-    #     df_path = base_path / f"{model}_{dataset}_{pmiss}.parquet"
-    #     df = pl.read_parquet(df_path)
-
-    #     if func_params == None:
-    #         metric = func_metric(df["y_hat"], df["y"])
-    #     else:
-    #         metric = func_metric(df["y_hat"], df["y"], **func_params)
-
-    #     results["classifier_name"].append(model)
-    #     results["dataset_name"].append(dataset)
-    #     results[metric_name].append(metric)
 
     df = pd.DataFrame(results)
 

@@ -14,6 +14,18 @@ from sktime.classification.deep_learning import ResNetClassifier
 def load_model(
     model_basepath: str, model: nn.Module, device: torch.device
 ) -> nn.Module:
+    """
+    Load a trained model from the specified base path.
+
+    Args:
+        model_basepath (str): The base path where the model is saved.
+        model (nn.Module): The model object to load the state dictionary into.
+        device (torch.device): The device to load the model onto.
+
+    Returns:
+        nn.Module: The loaded model.
+    """
+
     model_path = sorted(
         list(pathlib.Path(model_basepath).rglob("*best.pkl")),
         key=lambda x: int(x.stem.split("_")[-2]),
@@ -35,6 +47,25 @@ def torch_test_step(
     device: torch.device,
     inf_sample_size: int,
 ) -> float:
+    """
+    Perform a test step using PyTorch.
+
+    Args:
+        pmiss_path (pathlib.Path): The path to the directory containing the test data.
+        dataset_name (str): The name of the dataset.
+        pmiss (float): The percentage of missing values.
+        model_name (str): The name of the model.
+        config (dict): The configuration settings.
+        encoder (dict): The encoder settings.
+        decoder (dict): The decoder settings.
+        datasets_config (dict): The configuration settings for the datasets.
+        torch_tester (dict): The settings for the torch tester.
+        device (torch.device): The device to run the test on.
+        inf_sample_size (int): The size of the inference sample.
+
+    Returns:
+        float: The accuracy of the test.
+    """
     test_path = (
         pmiss_path / f"{dataset_name}_{int(100*pmiss)}_nan.ts"
         if config["test_nan"] and pmiss != 0.0
@@ -91,6 +122,20 @@ def general_step_tester(
     config: dict,
     general_tester: dict,
 ) -> None:
+    """
+    Perform a general step test.
+
+    Args:
+        pmiss_path (pathlib.Path): The path to the dataset.
+        dataset_name (str): The name of the dataset.
+        pmiss (float): The percentage of missing values.
+        model_name (str): The name of the model.
+        config (dict): The configuration settings.
+        general_tester (dict): The general tester settings.
+
+    Returns:
+        None
+    """
     dataset = GeneralDataset(
         dataset_path=pmiss_path,
         rocket=config["rocket"],

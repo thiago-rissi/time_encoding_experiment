@@ -25,6 +25,23 @@ def torch_train_step(
     torch_trainer: dict,
     device: torch.device,
 ) -> None:
+    """
+    Trains a Torch model for classification.
+
+    Args:
+        dataset_path (pathlib.Path): The path to the dataset.
+        dataset_name (str): The name of the dataset.
+        model_name (str): The name of the model.
+        datasets_config (dict): Configuration for the datasets.
+        config (dict): Configuration for the model.
+        encoder (dict): Configuration for the time encoding.
+        decoder (dict): Configuration for the decoder.
+        torch_trainer (dict): Configuration for the Torch trainer.
+        device (torch.device): The device to train the model on.
+
+    Returns:
+        None
+    """
 
     time_encoding_strategy = config["time_encoding"]["strategy"]
 
@@ -79,6 +96,19 @@ def general_train_step(
     config: dict,
     general_trainer: dict,
 ) -> None:
+    """
+    Train a model using the provided dataset.
+
+    Args:
+        dataset_path (pathlib.Path): The path to the dataset.
+        dataset_name (str): The name of the dataset.
+        model_name (str): The name of the model to train.
+        config (dict): A dictionary containing configuration parameters.
+        general_trainer (dict): A dictionary containing general training parameters.
+
+    Returns:
+        None
+    """
     dataset = GeneralDataset(
         dataset_path=dataset_path,
         rocket=config["rocket"],

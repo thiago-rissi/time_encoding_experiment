@@ -1,4 +1,0 @@
---extra-index-url https://pypi.nvidia.com
-cuml-cu12==24.4.*
-
-

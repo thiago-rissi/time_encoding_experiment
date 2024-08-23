@@ -12,6 +12,16 @@ import pickle
 
 
 def save_model(model, outputfile: pathlib.Path):
+    """
+    Save the model's state dictionary to the specified output file.
+
+    Args:
+        model: The model to save.
+        outputfile (pathlib.Path): The path to the output file.
+
+    Returns:
+        None
+    """
     torch.save(model.state_dict(), outputfile)
 
 
@@ -39,6 +49,29 @@ def index_agreement_torch(s: torch.Tensor, o: torch.Tensor) -> torch.Tensor:
 
 
 class TorchTrainer:
+    """
+    TorchTrainer class for training a PyTorch model.
+
+    Args:
+        loss (str): The name of the loss function.
+        model (nn.Module): The PyTorch model to be trained.
+        **kwargs: Additional keyword arguments.
+
+    Methods:
+        step(X, y, timestamps, optimizer):
+            Performs a single training step.
+
+        train_epoch(train_dl, validation_dl, optimizer, device):
+            Trains the model for a single epoch.
+
+        train(dataset, n_epochs, batch_size, early_stop, patience, lr, save_path, snapshot_interval, device, num_workers=0, **kwargs):
+            Trains the model for multiple epochs.
+
+    Attributes:
+        model (nn.Module): The PyTorch model.
+        loss_func: The loss function.
+    """
+
     def __init__(
         self,
         loss: str,

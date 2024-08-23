@@ -34,6 +34,27 @@ def sample_random_t_inference(
 
 
 class GeneralDataset:
+    """
+    A class representing a general dataset.
+
+    Args:
+        dataset_path (pathlib.Path): The path to the dataset.
+        rocket (bool): Whether to apply the ROCKET transformation.
+        task (str): The task type, either "train" or "test".
+        feature_first (bool): Whether the features are in the first dimension of the input data.
+        dataset_name (str): The name of the dataset.
+        add_encoding (bool): Whether to add time encoding to the input data.
+        time_encoding_size (int): The size of the time encoding.
+        dropout (float): The dropout rate for the time encoding.
+        pmiss (int, optional): The percentage of missing values. Defaults to 0.
+
+    Attributes:
+        X (numpy.ndarray): The input data.
+        y (numpy.ndarray): The encoded target labels.
+        encoding_order (list): The order of the class values.
+
+    """
+
     def __init__(
         self,
         dataset_path: pathlib.Path,
@@ -73,6 +94,38 @@ class GeneralDataset:
 
 
 class TorchDataset:
+    """
+    TorchDataset class represents a dataset for PyTorch models.
+
+    Args:
+        dataset_path (pathlib.Path): The path to the dataset.
+        dataset_name (str): The name of the dataset.
+        nan_strategy (str): The strategy to handle missing values.
+        device (torch.device): The device to use for computation.
+        time_encoding_strategy (str): The strategy to encode time information.
+        normalize (bool, optional): Whether to normalize the data. Defaults to False.
+        statistics (dict | None, optional): Statistics of the dataset. Defaults to None.
+
+    Attributes:
+        statistics (dict | None): Statistics of the dataset.
+        device (torch.device): The device used for computation.
+        dataset_path (pathlib.Path): The path to the dataset.
+        dataset_name (str): The name of the dataset.
+        normalize (bool): Whether the data is normalized.
+        X (torch.Tensor): The input data.
+        y (torch.Tensor): The target data.
+        timestamps (torch.Tensor): The timestamps of the data.
+        num_classes (int): The number of classes in the dataset.
+        nan_strategy (str): The strategy to handle missing values.
+        time_encoding_strategy (str): The strategy to encode time information.
+
+    Methods:
+        __len__(): Returns the number of instances in the dataset.
+        split_dataset(split_ratio: float) -> tuple[TorchDataset, TorchDataset]: Splits the dataset into train and test datasets.
+        __getitem__(idx: int) -> tuple[torch.Tensor, torch.Tensor]: Returns the data and target for a given index.
+
+    """
+
     def __init__(
         self,
         dataset_path: pathlib.Path,
@@ -161,55 +214,3 @@ class TorchDataset:
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
         return x_i[:, ids], y_i, self.timestamps[ids] - t_inf
-
-
-class TorchARDataset:
-    def __init__(
-        self,
-        dataset_path: pathlib.Path,
-        dataset_name: str,
-        nan_strategy: str,
-        device: torch.device,
-        normalize: bool = False,
-        statistics: dict | None = None,
-    ) -> None:
-
-        self.statistics = statistics
-        X, _ = load_from_tsfile(str(dataset_path))
-        metadata = get_dataset_metadata(dataset_name)
-
-        X = torch.tensor(X, device=device, dtype=torch.float32)
-
-        self.n_instances = X.shape[0]
-        self.n_variables = X.shape[1]
-        self.t_length = X.shape[2]
-
-        if (statistics == None) and (normalize == True):
-            self.statistics = calculate_stats(X)
-
-        if normalize == True:
-            X = normalize(X, self.statistics)
-
-        self.X = X
-        self.timestamps = torch.arange(self.t_length, device=device)
-        self.nan_strategy = nan_strategy
-
-    def __len__(self) -> int:
-        return self.n_instances
-
-    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
-
-        t_inf = sample_random_t_inference(
-            min_timestamp=0.0,
-            max_timestamp=self.timestamps.max().item(),
-        ).to(self.X.device)
-        x_i = self.X[idx]
-
-        mask = torch.ones(x_i.shape[1], dtype=torch.bool, device=self.X.device)
-
-        # sample 0.2 of the data to be missing
-        mask[torch.randperm(mask.shape[0])[: int(0.2 * mask.shape[0])]] = False
-
-        ids = torch.where(~torch.isnan(x_i[0]))[0]
-
-        return x_i[:, ids], self.timestamps[ids] - t_inf, mask[ids]

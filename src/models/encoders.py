@@ -5,7 +5,6 @@ from models.time_encoders import (
     AbsolutePositionalEncoding,
     LearnablePositionalEncoding,
 )
-from models.attention import Attention, Attention_Rel_Scl, Attention_Rel_Vec
 import torch
 import torch.nn as nn
 from models.time_encoders import *
