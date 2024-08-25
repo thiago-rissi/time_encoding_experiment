@@ -57,10 +57,10 @@ def pre_process(
         if process_train:
             # Firstly, pre processes dataset without missing data
             base_data(
-                X_train=X_train,
-                X_test=X_test,
-                y_train=y_train,
-                y_test=y_test,
+                X_train=X_train.copy(),
+                X_test=X_test.copy(),
+                y_train=y_train.copy(),
+                y_test=y_test.copy(),
                 dataset=dataset,
                 rocket_path=out_path,
                 out_path=out_path / "0_missing",
@@ -68,8 +68,8 @@ def pre_process(
 
         for pmiss in pmiss_list:
             pre_process_step(
-                X_test=X_test,
-                y_test=y_test,
+                X_test=X_test.copy(),
+                y_test=y_test.copy(),
                 pmiss=pmiss,
                 out_path=out_path,
                 dataset=dataset,

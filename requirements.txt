@@ -20,4 +20,4 @@ cupy-cuda12x
 xgboost
 einops
 openpyxl
-scypi
+scipy

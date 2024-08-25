@@ -2,7 +2,6 @@ import pathlib
 import torch
 import sys
 from models.ts_classifier import TSClassifier  # , TSAREncoderDecoder
-from models.resnet import ResNet50
 from train_node.trainers import *
 from dataset.utils import *
 from dataset.datasets import *

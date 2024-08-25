@@ -1,19 +1,34 @@
 datasets:
-  - ArticularyWordRecognition
-  - BasicMotions
-  - Cricket
-  - ERing
-  - Epilepsy
-  - Heartbeat
-  - JapaneseVowels
-  - LSST
-  - Libras
-  - NATOPS
-  - PEMS-SF
-  - RacketSports
-  - SelfRegulationSCP1
-  - SpokenArabicDigits
-  - UWaveGestureLibrary
+  - Car
+  - CinCECGTorso
+  - Computers
+  - Earthquakes
+  - ECG200
+  - Fish
+  - FordA
+  - InlineSkate
+  - OSULeaf
+  - PowerCons
+  - RefrigerationDevices
+  - ScreenType
+  - Symbols
+  - ToeSegmentation1
+  - Wafer
+  # - ArticularyWordRecognition
+  # - BasicMotions
+  # - Cricket
+  # - ERing
+  # - Epilepsy
+  # - Heartbeat
+  # - JapaneseVowels
+  # - LSST
+  # - Libras
+  # - NATOPS
+  # - PEMS-SF
+  # - RacketSports
+  # - SelfRegulationSCP1
+  # - SpokenArabicDigits
+  # - UWaveGestureLibrary
 
 models:
   - RNN
@@ -54,7 +69,7 @@ torch_tester:
   loss: CrossEntropyLoss
   batch_size: 10
   base_path: data/outputs
-  inf_sample_size: 1
+  inf_sample_size: 10
 general_tester:
   base_path: data/outputs
   add_encoding: false
