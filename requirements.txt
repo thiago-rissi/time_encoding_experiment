@@ -21,3 +21,4 @@ xgboost
 einops
 openpyxl
 scipy
+torch_geometric

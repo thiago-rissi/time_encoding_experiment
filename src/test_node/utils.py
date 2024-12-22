@@ -26,11 +26,10 @@ def load_model(
         nn.Module: The loaded model.
     """
 
-    model_path = sorted(
-        list(pathlib.Path(model_basepath).rglob("*best.pkl")),
-        key=lambda x: int(x.stem.split("_")[-2]),
-    )[-1]
-    model.load_state_dict(torch.load(model_path, map_location=device))
+    model_path = list(pathlib.Path(model_basepath).rglob("*best.pkl"))[-1]
+    model.load_state_dict(
+        torch.load(model_path, map_location=device, weights_only=True)
+    )
     return model
 
 

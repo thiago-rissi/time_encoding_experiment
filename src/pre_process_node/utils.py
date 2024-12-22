@@ -22,8 +22,8 @@ def open_and_split(
     path_train = dataset_path / (dataset + "_TRAIN.ts")
     path_test = dataset_path / (dataset + "_TEST.ts")
 
-    X_train, y_train = load_from_tsfile(str(path_train))
-    X_test, y_test = load_from_tsfile(str(path_test))
+    X_train, y_train = load_from_ts_file(str(path_train))
+    X_test, y_test = load_from_ts_file(str(path_test))
     X = np.concatenate([X_train, X_test])
     y = np.concatenate([y_train, y_test])
 
@@ -56,13 +56,13 @@ def base_data(
     Returns:
         None
     """
-    write_to_tsfile(
+    write_to_ts_file(
         X=X_train,
         y=y_train,
         problem_name=f"{dataset}_train.ts",
         path=out_path,
     )
-    write_to_tsfile(
+    write_to_ts_file(
         X=X_test,
         y=y_test,
         problem_name=f"{dataset}_0.ts",
@@ -115,7 +115,7 @@ def pre_process_step(
         window_mean=window_mean,
         window_std=window_std,
     )
-    write_to_tsfile(
+    write_to_ts_file(
         X=X_nan.swapaxes(1, 2),
         y=y_test,
         problem_name=f"{dataset}_{int(100*pmiss)}_nan.ts",
@@ -129,7 +129,7 @@ def pre_process_step(
         f_time = datetime.datetime.now()
         print(f"Imputation time: {f_time - i_time}")
 
-        write_to_tsfile(
+        write_to_ts_file(
             X=X_imp.swapaxes(1, 2),
             y=y_test,
             problem_name=f"{dataset}_{int(100*pmiss)}.ts",

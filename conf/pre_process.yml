@@ -3,21 +3,21 @@ imputer_name: MissForest
 primary_path: data/primary
 feature_path: data/feature
 datasets:
-  - Car
-  - CinCECGTorso
-  - Computers
-  - Earthquakes
-  - ECG200
-  - Fish
-  - FordA
-  - InlineSkate
-  - OSULeaf
-  - PowerCons
-  - RefrigerationDevices
-  - ScreenType
-  - Symbols
-  - ToeSegmentation1
-  - Wafer
+  # - Car
+  # - CinCECGTorso
+  # - Computers
+  # - Earthquakes
+  # - ECG200
+  # - Fish
+  # - FordA
+  # - InlineSkate
+  # - OSULeaf
+  # - PowerCons
+  # - RefrigerationDevices
+  # - ScreenType
+  # - Symbols
+  # - ToeSegmentation1
+  # - Wafer
   # - ArticularyWordRecognition
   # - BasicMotions
   # - Cricket
@@ -33,6 +33,7 @@ datasets:
   # - SelfRegulationSCP1
   # - SpokenArabicDigits
   # - UWaveGestureLibrary
+  - EthanolConcentration
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:

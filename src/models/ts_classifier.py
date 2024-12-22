@@ -88,8 +88,12 @@ class TSEncoder(nn.Module):
         self.time_encoding_size = time_encoding["time_encoding_size"]
         self.time_encoding_strategy = time_encoding["strategy"]
         self.time_encoding_class = time_encoding["time_encoding_class"]
-        self.projection = nn.Linear(
-            num_features + self.time_encoding_size, self.input_size
+        self.num_features = num_features
+        self.projections = nn.ModuleList(
+            [
+                nn.Linear(1 + self.time_encoding_size, self.input_size)
+                for _ in range(num_features)
+            ]
         )
 
         if self.time_encoding_class == "PositionalEncoding":
@@ -110,11 +114,41 @@ class TSEncoder(nn.Module):
             self.time_encoder = lambda x: x.unsqueeze(-1)
 
         encoder_class = getattr(sys.modules[__name__], encoder_class)
-        self.encoder_wrapper = encoder_class(
-            seq_len=t_length,
-            **ts_encoding,
-            **time_encoding,
+        self.encoders = nn.ModuleList(
+            [
+                encoder_class(
+                    seq_len=t_length,
+                    **ts_encoding,
+                    **time_encoding,
+                )
+                for _ in range(num_features)
+            ]
         )
+
+        self.gnn = GNN(
+            num_node_features=self.input_size,
+            hidden_size=400,
+        )
+
+    def encode_timestamps(self, timestamps: torch.Tensor) -> torch.Tensor:
+        """
+        Encode the timestamps.
+
+        Args:
+            timestamps (torch.Tensor): Timestamps tensor.
+
+        Returns:
+            torch.Tensor: Encoded timestamps tensor.
+
+        """
+        if self.time_encoding_class in ["Timestamps", "Linear", "Time2Vec"]:
+            timestamps = min_max_norm(timestamps)
+
+        if self.unsqueeze_timestamps:
+            timestamps = timestamps.unsqueeze(-1)
+
+        encoded_timestamps = self.time_encoder(timestamps)
+        return encoded_timestamps
 
     def forward(
         self,
@@ -132,22 +166,26 @@ class TSEncoder(nn.Module):
             tuple[torch.Tensor, torch.Tensor]: Tuple containing the output tensor and hidden state tensor.
 
         """
+
         X = X.swapaxes(1, 2)
 
-        if self.time_encoder is not None:
-            if self.time_encoding_class in ["Timestamps", "Linear", "Time2Vec"]:
-                timestamps = min_max_norm(timestamps)
+        h_t = []
+        for j in range(self.num_features):
+            xj = X[:, :, j].unsqueeze(-1)
+            if self.time_encoder is not None:
+                encoded_timestamps = self.encode_timestamps(timestamps)
+                xj = torch.concat(
+                    [
+                        xj,
+                        encoded_timestamps,
+                    ],
+                    dim=-1,
+                )
+            xj = self.projections[j](xj)
+            h_t.append(self.encoders[j](X=xj))
 
-            if self.unsqueeze_timestamps:
-                timestamps = timestamps.unsqueeze(-1)
-
-            encoded_timestamps = self.time_encoder(timestamps)
-            X = torch.cat([X, encoded_timestamps], dim=-1)
-
-        X = self.projection(X)
-
-        h_t = self.encoder_wrapper(X=X)
-
+        h_t = torch.stack(h_t, dim=1)
+        h_t = self.gnn(h_t)
         return h_t
 
 
@@ -189,7 +227,7 @@ class TSClassifier(nn.Module):
         )
         self.decoder = TSDecoder(num_classes=num_classes, **decoder, **model_config)
 
-    def forward(self, X: torch.Tensor, timestamps: torch.Tensor):
+    def forward(self, X: torch.Tensor, timestamps: torch.Tensor) -> torch.Tensor:
         """
         Forward pass of the TSClassifier model.
 

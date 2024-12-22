@@ -5,12 +5,9 @@ from models.ts_classifier import TSClassifier  # , TSAREncoderDecoder
 from train_node.trainers import *
 from dataset.utils import *
 from dataset.datasets import *
-from sklearn.linear_model import RidgeClassifier
-from sktime.classification.deep_learning.resnet import ResNetClassifier
-from sktime.classification.interval_based import CanonicalIntervalForest
-from sktime.classification.hybrid import HIVECOTEV2
 import datetime
 import yaml
+import shutil
 
 
 def torch_train_step(
@@ -51,6 +48,7 @@ def torch_train_step(
         nan_strategy=datasets_config["nan_strategy"][dataset_name],
         device=device,
         time_encoding_strategy=time_encoding_strategy,
+        training=True,
     )
 
     model = TSClassifier(
@@ -67,6 +65,7 @@ def torch_train_step(
         pathlib.Path(class_trainer_config["base_path"]) / model_name
     ) / dataset_name
 
+    shutil.rmtree(save_path, ignore_errors=True)
     save_path.mkdir(parents=True, exist_ok=True)
 
     train_yml = save_path.parent / "train.yml"

@@ -8,6 +8,8 @@ import torch.nn as nn
 from models.time_encoders import *
 from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
 import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
+from torch_geometric.data import Data
 
 
 class TransformerTorch(nn.Module):
@@ -73,8 +75,8 @@ class TransformerTorch(nn.Module):
         """
         X_encoded = self.encoder(X)
         X_encoded = self.dropout(X_encoded)
-        X_mean = X_encoded[:, -1]
-        X_linear = self.linear(X_mean)
+        X_encoded = X_encoded[:, -1]
+        X_linear = self.linear(X_encoded)
 
         return X_linear
 
@@ -133,3 +135,38 @@ class RNN(nn.Module):
         _, h_t = self.encoder(X)
 
         return h_t[-1]
+
+
+class GNN(torch.nn.Module):
+    def __init__(self, num_node_features: int, hidden_size: int):
+        super().__init__()
+        self.conv1 = GCNConv(hidden_size, hidden_size)
+        self.conv2 = GCNConv(hidden_size, hidden_size)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        batch_size = x.size(0)
+        x = torch.concat(
+            [x, torch.zeros((batch_size, 1, x.size(-1))).to(x.device)], dim=1
+        )
+        num_nodes = x.size(1)
+        x = x.view(-1, x.size(-1))
+
+        edge_index = torch.cat(
+            [
+                torch.tensor(
+                    [
+                        [i + b * num_nodes, j + b * num_nodes]
+                        for i in range(num_nodes)
+                        for j in range(num_nodes)
+                        if i != j
+                    ],
+                    dtype=torch.long,
+                ).t()
+                for b in range(batch_size)
+            ],
+            dim=1,
+        ).to(x.device)
+        x = self.conv1(x, edge_index)
+        h = self.conv2(x, edge_index)
+        h = h.view(batch_size, num_nodes, -1)
+        return h[:, -1, :]

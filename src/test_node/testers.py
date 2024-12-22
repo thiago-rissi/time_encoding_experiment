@@ -1,14 +1,10 @@
 from dataset.datasets import TorchDataset
-from torch.utils.data import DataLoader
-from torch.optim import Adam, Optimizer
+from torch_geometric.loader import DataLoader
 from typing import Any
 import torch.nn as nn
 import pathlib
 import torch
 from tqdm import tqdm
-from torch.nn import CrossEntropyLoss
-import numpy as np
-import pickle
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 import polars as pl
 
@@ -75,10 +71,10 @@ class TorchTester:
             drop_last=False,
         )
         all_infs = []
-        for inf_sample in range(inf_sample_size):
+        for j in range(inf_sample_size):
             ys = []
             ys_hat = []
-            for i, (X, y, timestamps) in enumerate((pbar := tqdm(test_dataloader))):
+            for i, (X, timestamps, y) in enumerate((pbar := tqdm(test_dataloader))):
                 with torch.no_grad():
                     y_hat, loss = self.predict(X, y, timestamps)
                     y = y.cpu()

@@ -1,5 +1,5 @@
 import torch
-from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
+from aeon.datasets import load_classification, load_from_ts_file, write_to_ts_file
 import pathlib
 import numpy.typing as npt
 import numpy as np
@@ -87,7 +87,7 @@ def get_dataset_metadata(dataset: str):
 
     base_path = pathlib.Path("data/primary")
     path = (base_path / dataset) / f"{dataset}_TRAIN.ts"
-    _, _, metadata = load_from_tsfile(str(path), return_meta_data=True)
+    _, _, metadata = load_from_ts_file(str(path), return_meta_data=True)
 
     return metadata
 

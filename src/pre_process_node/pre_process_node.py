@@ -33,9 +33,6 @@ def pre_process(
         window_mean (float): percentage of the context window for considering as a normal distribution's mean, in order to sample missing gap's size in feature engineering.
         window_std (float): percentage of the context window for considering as a normal distribution's standard deviation, in order to sample missing gap's size in feature engineering.
         **kwargs: Additional keyword arguments.
-
-    Returns:
-        None
     """
     primary_path = pathlib.Path(primary_path)
     feature_path = pathlib.Path(feature_path)

@@ -5,7 +5,7 @@ import random
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from typing import Any
-from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
+from aeon.datasets import load_classification, load_from_ts_file, write_to_ts_file
 from xgboost import XGBRegressor
 import cupy as cp
 

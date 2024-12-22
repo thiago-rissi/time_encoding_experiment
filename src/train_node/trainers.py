@@ -1,14 +1,13 @@
 from dataset.datasets import TorchDataset
-from torch.utils.data import DataLoader
+from torch_geometric.loader import DataLoader
 from torch.optim import Adam, Optimizer
 from typing import Any
 import torch.nn as nn
 import pathlib
 import torch
 from tqdm import tqdm
-from torch.nn import CrossEntropyLoss
 import numpy as np
-import pickle
+from torch_geometric.data import Data
 
 
 def save_model(model, outputfile: pathlib.Path):
@@ -105,7 +104,7 @@ class TorchTrainer:
     ):
         losses = []
         self.model.train()
-        for i, (X, y, timestamps) in enumerate((pbar := tqdm(train_dl))):
+        for i, (X, timestamps, y) in enumerate((pbar := tqdm(train_dl))):
             X.to(device)
             y.to(device)
             loss = self.step(
@@ -120,7 +119,7 @@ class TorchTrainer:
 
         self.model.eval()
         with torch.no_grad():
-            for i, (X, y, timestamps) in enumerate((pbar := tqdm(validation_dl))):
+            for i, (X, timestamps, y) in enumerate((pbar := tqdm(validation_dl))):
                 X.to(device)
                 y.to(device)
                 y_hat = self.model(X, timestamps)
@@ -185,9 +184,7 @@ class TorchTrainer:
 
             if early_stop:
                 if loss < best_loss:
-                    save_model(
-                        self.model, pathlib.Path(save_path) / f"model_{epoch}_best.pkl"
-                    )
+                    save_model(self.model, pathlib.Path(save_path) / f"model_best.pkl")
                     best_loss = loss
                     patience = patience_init
                 else:

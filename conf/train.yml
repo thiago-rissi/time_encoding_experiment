@@ -1,19 +1,19 @@
 datasets:
-  - Car
-  - CinCECGTorso
-  - Computers
-  - Earthquakes
-  - ECG200
-  - Fish
-  - FordA
-  - InlineSkate
-  - OSULeaf
-  - PowerCons
-  - RefrigerationDevices
-  - ScreenType
-  - Symbols
-  - ToeSegmentation1
-  - Wafer
+  # - Car
+  # - CinCECGTorso
+  # - Computers
+  # - Earthquakes
+  # - ECG200
+  # - Fish
+  # - FordA
+  # - InlineSkate
+  # - OSULeaf
+  # - PowerCons
+  # - RefrigerationDevices
+  # - ScreenType
+  # - Symbols
+  # - ToeSegmentation1
+  # - Wafer
   # - ArticularyWordRecognition
   # - BasicMotions
   # - Cricket
@@ -29,30 +29,31 @@ datasets:
   # - SelfRegulationSCP1
   # - SpokenArabicDigits
   # - UWaveGestureLibrary
+  - EthanolConcentration
 
 models:
-  - RNN
-  - RNNTime2Vec
-  - RNNPE
-  - RNNTPE
-  - RNNLinear
-  - RNNTime2VecRel
-  - RNNPERel
-  - RNNTPERel
-  - RNNLinearRel
-  - RNNTimestamps
-  - RNNTimestampsRel
-  - TransformerTimestamps
-  - TransformerTimestampsRel
-  - Transformer
+  # - RNN
+  # - RNNTime2Vec
+  # - RNNPE
+  # - RNNTPE
+  # - RNNLinear
+  # - RNNTime2VecRel
+  # - RNNPERel
+  # - RNNTPERel
+  # - RNNLinearRel
+  # - RNNTimestamps
+  # - RNNTimestampsRel
+  # - TransformerTimestamps
+  # - TransformerTimestampsRel
+  # - Transformer
   - TransformerTime2Vec
-  - TransformerPE
-  - TransformerTPE
-  - TransformerLinear
-  - TransformerTime2VecRel
-  - TransformerPERel
-  - TransformerTPERel
-  - TransformerLinearRel
+  # - TransformerPE
+  # - TransformerTPE
+  # - TransformerLinear
+  # - TransformerTime2VecRel
+  # - TransformerPERel
+  # - TransformerTPERel
+  # - TransformerLinearRel
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
@@ -66,8 +67,8 @@ torch_trainer:
     early_stop: true
     tol: 1e-3
     lr: 1e-4
-    patience: 100
-    snapshot_interval: 10
+    patience: 50
+    snapshot_interval: 50
     base_path: data/models
 
 general_trainer:

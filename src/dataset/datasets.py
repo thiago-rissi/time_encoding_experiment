@@ -1,12 +1,13 @@
 import torch
 import numpy.typing as npt
-from aeon.datasets import load_classification, load_from_tsfile, write_to_tsfile
+from aeon.datasets import load_classification, load_from_ts_file, write_to_ts_file
 from dataset.utils import *
 import pathlib
 import numpy as np
 import pickle
 from models.time_encoders import PositionalEncoding
 from pre_process_node.rocket import apply_rocket
+from torch_geometric.data import Data
 
 
 def sample_random_t_inference(
@@ -72,7 +73,7 @@ class GeneralDataset:
             if task == "train"
             else dataset_path / (dataset_name + f"_{pmiss}.ts")
         )
-        X, y = load_from_tsfile(str(ts_path))
+        X, y = load_from_ts_file(str(ts_path))
         self.timestamps = np.ones(shape=(X.shape[0], X.shape[-1])) * np.arange(
             X.shape[-1]
         )
@@ -119,10 +120,7 @@ class TorchDataset:
         nan_strategy (str): The strategy to handle missing values.
         time_encoding_strategy (str): The strategy to encode time information.
 
-    Methods:
-        __len__(): Returns the number of instances in the dataset.
-        split_dataset(split_ratio: float) -> tuple[TorchDataset, TorchDataset]: Splits the dataset into train and test datasets.
-        __getitem__(idx: int) -> tuple[torch.Tensor, torch.Tensor]: Returns the data and target for a given index.
+
 
     """
 
@@ -133,6 +131,7 @@ class TorchDataset:
         nan_strategy: str,
         device: torch.device,
         time_encoding_strategy: str,
+        training: bool = False,
         normalize: bool = False,
         statistics: dict | None = None,
     ) -> None:
@@ -144,7 +143,7 @@ class TorchDataset:
 
         self.normalize = normalize
 
-        X, y = load_from_tsfile(str(dataset_path))
+        X, y = load_from_ts_file(str(dataset_path))
         metadata = get_dataset_metadata(dataset_name)
 
         X = torch.tensor(X, device=device, dtype=torch.float32)
@@ -160,6 +159,7 @@ class TorchDataset:
         self.num_classes = len(self.encoding_order)
         self.nan_strategy = nan_strategy
         self.time_encoding_strategy = time_encoding_strategy
+        self.training = training
 
     def __len__(self) -> int:
         return self.n_instances
@@ -175,6 +175,7 @@ class TorchDataset:
             normalize=self.normalize,
             statistics=self.statistics,
             time_encoding_strategy=self.time_encoding_strategy,
+            training=True,
         )
 
         split_index = int(split_ratio * len(train_dataset))
@@ -199,10 +200,24 @@ class TorchDataset:
 
         return train_dataset, test_dataset
 
+    def create_graph(
+        self, data: torch.Tensor, timestamps: torch.Tensor, y: torch.Tensor
+    ) -> Data:
+        timestamps = timestamps.unsqueeze(0)
+        edge_index = (
+            torch.tensor(
+                [[i, i + 1] for i in range(data.shape[0] - 1)], dtype=torch.long
+            )
+            .t()
+            .contiguous()
+        )
+
+        return Data(x=data, edge_index=edge_index, timestamps=timestamps, y=y)
+
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
         t_inf = 0.0
-        if self.time_encoding_strategy == "delta":
+        if self.time_encoding_strategy == "delta" and self.training:
             t_inf = sample_random_t_inference(
                 min_timestamp=0.0,
                 max_timestamp=self.timestamps.max().item(),
@@ -213,4 +228,4 @@ class TorchDataset:
 
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
-        return x_i[:, ids], y_i, self.timestamps[ids] - t_inf
+        return x_i[:, ids], self.timestamps[ids] - t_inf, y_i

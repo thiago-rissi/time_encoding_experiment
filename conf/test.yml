@@ -1,24 +1,24 @@
 datasets:
-  - Car
-  - CinCECGTorso
-  - Computers
-  - Earthquakes
-  - ECG200
-  - Fish
-  - FordA
-  - InlineSkate
-  - OSULeaf
-  - PowerCons
-  - RefrigerationDevices
-  - ScreenType
-  - Symbols
-  - ToeSegmentation1
-  - Wafer
+  # - Car
+  # - CinCECGTorso
+  # - Computers
+  # - Earthquakes
+  # - ECG200
+  # - Fish
+  # - FordA
+  # - InlineSkate
+  # - OSULeaf
+  # - PowerCons
+  # - RefrigerationDevices
+  # - ScreenType
+  # - Symbols
+  # - ToeSegmentation1
+  # - Wafer
   # - ArticularyWordRecognition
   # - BasicMotions
   # - Cricket
   # - ERing
-  # - Epilepsy
+  - Epilepsy
   # - Heartbeat
   # - JapaneseVowels
   # - LSST
@@ -32,27 +32,27 @@ datasets:
 
 models:
   - RNN
-  - RNNTime2Vec
-  - RNNPE
-  - RNNTPE
-  - RNNLinear
-  - RNNTime2VecRel
-  - RNNPERel
-  - RNNTPERel
-  - RNNLinearRel
-  - RNNTimestamps
-  - RNNTimestampsRel
-  - TransformerTimestamps
-  - TransformerTimestampsRel
-  - Transformer
+  # - RNNTime2Vec
+  # - RNNPE
+  # - RNNTPE
+  # - RNNLinear
+  # - RNNTime2VecRel
+  # - RNNPERel
+  # - RNNTPERel
+  # - RNNLinearRel
+  # - RNNTimestamps
+  # - RNNTimestampsRel
+  # - TransformerTimestamps
+  # - TransformerTimestampsRel
+  # - Transformer
   - TransformerTime2Vec
-  - TransformerPE
-  - TransformerTPE
-  - TransformerLinear
-  - TransformerTime2VecRel
-  - TransformerPERel
-  - TransformerTPERel
-  - TransformerLinearRel
+  # - TransformerPE
+  # - TransformerTPE
+  # - TransformerLinear
+  # - TransformerTime2VecRel
+  # - TransformerPERel
+  # - TransformerTPERel
+  # - TransformerLinearRel
   # - RidgeClassifier
   # - CanonicalIntervalForest
   # - HIVECOTEV2
@@ -69,7 +69,7 @@ torch_tester:
   loss: CrossEntropyLoss
   batch_size: 10
   base_path: data/outputs
-  inf_sample_size: 10
+  inf_sample_size: 1
 general_tester:
   base_path: data/outputs
   add_encoding: false
