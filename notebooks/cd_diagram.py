@@ -11,8 +11,10 @@ from sklearn.metrics import (
     balanced_accuracy_score,
 )
 
-base_path = pathlib.Path("/usr/src/code/data/outputs")
-pmiss = 70
+base_path = pathlib.Path(
+    "C:\\Users\\thiag\\Desktop\\time_encoding_experiment\\data\\outputs"
+)
+pmiss = 0
 model = "transformer"
 metric_name = "f1_score"
 
@@ -52,16 +54,16 @@ if __name__ == "__main__":
     elif model == "transformer":
         models = [
             "Transformer",
-            "TransformerTimestamps",
-            "TransformerTimestampsRel",
-            "TransformerTime2Vec",
+            # "TransformerTimestamps",
+            # "TransformerTimestampsRel",
+            # "TransformerTime2Vec",
             "TransformerPE",
-            "TransformerTPE",
-            "TransformerLinear",
-            "TransformerTime2VecRel",
-            "TransformerPERel",
-            "TransformerTPERel",
-            "TransformerLinearRel",
+            # "TransformerTPE",
+            # "TransformerLinear",
+            # "TransformerTime2VecRel",
+            # "TransformerPERel",
+            # "TransformerTPERel",
+            # "TransformerLinearRel",
         ]
 
     df = gather_metric_cd(

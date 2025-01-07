@@ -4,6 +4,7 @@ import pathlib
 import numpy.typing as npt
 import numpy as np
 from typing import Any
+import yaml
 
 
 def normalize_ts(ts: torch.Tensor, stats: list[tuple[float, float]]) -> torch.Tensor:
@@ -85,9 +86,10 @@ def get_dataset_metadata(dataset: str):
         metadata: The metadata of the dataset.
     """
 
-    base_path = pathlib.Path("data/primary")
-    path = (base_path / dataset) / f"{dataset}_TRAIN.ts"
-    _, _, metadata = load_from_ts_file(str(path), return_meta_data=True)
+    base_path = pathlib.Path("data/metadata")
+    metadata_path = base_path / f"{dataset}_metadata.yml"
+    with open(metadata_path, "r") as f:
+        metadata = yaml.safe_load(f)
 
     return metadata
 

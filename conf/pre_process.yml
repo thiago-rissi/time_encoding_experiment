@@ -18,22 +18,22 @@ datasets:
   # - Symbols
   # - ToeSegmentation1
   # - Wafer
-  # - ArticularyWordRecognition
-  # - BasicMotions
-  # - Cricket
-  # - ERing
-  # - Epilepsy
-  # - Heartbeat
-  # - JapaneseVowels
-  # - LSST
-  # - Libras
-  # - NATOPS
-  # - PEMS-SF
-  # - RacketSports
-  # - SelfRegulationSCP1
-  # - SpokenArabicDigits
-  # - UWaveGestureLibrary
-  - EthanolConcentration
+  - ArticularyWordRecognition
+  - BasicMotions
+  - Cricket
+  - ERing
+  - Epilepsy
+  - Heartbeat
+  - JapaneseVowels
+  - LSST
+  - Libras
+  - NATOPS
+  - PEMS-SF
+  - RacketSports
+  - SelfRegulationSCP1
+  - SpokenArabicDigits
+  - UWaveGestureLibrary
+  # - EthanolConcentration
 train_ratio: 0.7
 max_iter: 10
 nan_strategy:

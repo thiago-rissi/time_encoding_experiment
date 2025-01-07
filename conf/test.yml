@@ -14,24 +14,24 @@ datasets:
   # - Symbols
   # - ToeSegmentation1
   # - Wafer
-  # - ArticularyWordRecognition
-  # - BasicMotions
-  # - Cricket
-  # - ERing
+  - ArticularyWordRecognition
+  - BasicMotions
+  - Cricket
+  - ERing
   - Epilepsy
-  # - Heartbeat
-  # - JapaneseVowels
-  # - LSST
-  # - Libras
-  # - NATOPS
-  # - PEMS-SF
-  # - RacketSports
-  # - SelfRegulationSCP1
-  # - SpokenArabicDigits
-  # - UWaveGestureLibrary
+  - Heartbeat
+  - JapaneseVowels
+  - LSST
+  - Libras
+  - NATOPS
+  - PEMS-SF
+  - RacketSports
+  - SelfRegulationSCP1
+  - SpokenArabicDigits
+  - UWaveGestureLibrary
 
 models:
-  - RNN
+  # - RNN
   # - RNNTime2Vec
   # - RNNPE
   # - RNNTPE
@@ -42,13 +42,13 @@ models:
   # - RNNLinearRel
   # - RNNTimestamps
   # - RNNTimestampsRel
-  # - TransformerTimestamps
+  - TransformerTimestamps
   # - TransformerTimestampsRel
   # - Transformer
   - TransformerTime2Vec
   # - TransformerPE
-  # - TransformerTPE
-  # - TransformerLinear
+  - TransformerTPE
+  - TransformerLinear
   # - TransformerTime2VecRel
   # - TransformerPERel
   # - TransformerTPERel

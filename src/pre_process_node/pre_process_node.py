@@ -1,4 +1,5 @@
 from pre_process_node.utils import *
+import sys
 
 
 def pre_process(
@@ -42,7 +43,7 @@ def pre_process(
     for dataset in datasets:
         print(f"Pre-processing dataset: {dataset}")
         initial_time = datetime.datetime.now()
-        dataset_path = primary_path / dataset
+        dataset_path = primary_path
         dataset_path.mkdir(exist_ok=True)
         out_path = feature_path / dataset
         out_path.mkdir(exist_ok=True)

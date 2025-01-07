@@ -1,6 +1,6 @@
 from pre_process_node.imputation import *
 from pre_process_node.rocket import *
-import sys
+import yaml
 from sklearn.model_selection import train_test_split
 import datetime
 
@@ -19,13 +19,21 @@ def open_and_split(
     Returns:
         tuple[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]: A tuple containing the training and testing data and labels.
     """
-    path_train = dataset_path / (dataset + "_TRAIN.ts")
-    path_test = dataset_path / (dataset + "_TEST.ts")
+    X, y, metadata = load_classification(
+        name=dataset, extract_path=dataset_path, return_metadata=True
+    )
+    metadata_path = pathlib.Path("data/metadata")
+    metadata_path.mkdir(exist_ok=True)
 
-    X_train, y_train = load_from_ts_file(str(path_train))
-    X_test, y_test = load_from_ts_file(str(path_test))
-    X = np.concatenate([X_train, X_test])
-    y = np.concatenate([y_train, y_test])
+    with open(metadata_path / f"{dataset}_metadata.yml", "w") as f:
+        yaml.dump(metadata, f)
+    # path_train = dataset_path / (dataset + "_TRAIN.ts")
+    # path_test = dataset_path / (dataset + "_TEST.ts")
+
+    # X_train, y_train = load_from_ts_file(str(path_train))
+    # X_test, y_test = load_from_ts_file(str(path_test))
+    # X = np.concatenate([X_train, X_test])
+    # y = np.concatenate([y_train, y_test])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_ratio)
 

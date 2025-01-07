@@ -14,22 +14,22 @@ datasets:
   # - Symbols
   # - ToeSegmentation1
   # - Wafer
-  # - ArticularyWordRecognition
-  # - BasicMotions
-  # - Cricket
-  # - ERing
-  # - Epilepsy
-  # - Heartbeat
-  # - JapaneseVowels
-  # - LSST
-  # - Libras
-  # - NATOPS
-  # - PEMS-SF
-  # - RacketSports
-  # - SelfRegulationSCP1
-  # - SpokenArabicDigits
-  # - UWaveGestureLibrary
-  - EthanolConcentration
+  - ArticularyWordRecognition
+  - BasicMotions
+  - Cricket
+  - ERing
+  - Epilepsy
+  - Heartbeat
+  - JapaneseVowels
+  - LSST
+  - Libras
+  - NATOPS
+  - PEMS-SF
+  - RacketSports
+  - SelfRegulationSCP1
+  - SpokenArabicDigits
+  - UWaveGestureLibrary
+  
 
 models:
   # - RNN
@@ -43,13 +43,13 @@ models:
   # - RNNLinearRel
   # - RNNTimestamps
   # - RNNTimestampsRel
-  # - TransformerTimestamps
+  - TransformerTimestamps
   # - TransformerTimestampsRel
   # - Transformer
   - TransformerTime2Vec
   # - TransformerPE
-  # - TransformerTPE
-  # - TransformerLinear
+  - TransformerTPE
+  - TransformerLinear
   # - TransformerTime2VecRel
   # - TransformerPERel
   # - TransformerTPERel
@@ -67,7 +67,7 @@ torch_trainer:
     early_stop: true
     tol: 1e-3
     lr: 1e-4
-    patience: 50
+    patience: 100
     snapshot_interval: 50
     base_path: data/models
 

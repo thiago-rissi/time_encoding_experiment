@@ -89,11 +89,16 @@ class TSEncoder(nn.Module):
         self.time_encoding_strategy = time_encoding["strategy"]
         self.time_encoding_class = time_encoding["time_encoding_class"]
         self.num_features = num_features
-        self.projections = nn.ModuleList(
-            [
-                nn.Linear(1 + self.time_encoding_size, self.input_size)
-                for _ in range(num_features)
-            ]
+
+        # self.projections = nn.ModuleList(
+        #     [
+        #         nn.Linear(1 + self.time_encoding_size, self.input_size)
+        #         for _ in range(num_features)
+        #     ]
+        # )
+
+        self.projection = nn.Linear(
+            num_features + self.time_encoding_size, self.input_size
         )
 
         if self.time_encoding_class == "PositionalEncoding":
@@ -114,21 +119,27 @@ class TSEncoder(nn.Module):
             self.time_encoder = lambda x: x.unsqueeze(-1)
 
         encoder_class = getattr(sys.modules[__name__], encoder_class)
-        self.encoders = nn.ModuleList(
-            [
-                encoder_class(
-                    seq_len=t_length,
-                    **ts_encoding,
-                    **time_encoding,
-                )
-                for _ in range(num_features)
-            ]
-        )
 
-        self.gnn = GNN(
-            num_node_features=self.input_size,
-            hidden_size=400,
+        self.encoder_wrapper = encoder_class(
+            seq_len=t_length,
+            **ts_encoding,
+            **time_encoding,
         )
+        # self.encoders = nn.ModuleList(
+        #     [
+        #         encoder_class(
+        #             seq_len=t_length,
+        #             **ts_encoding,
+        #             **time_encoding,
+        #         )
+        #         for _ in range(num_features)
+        #     ]
+        # )
+
+        # self.gnn = GNN(
+        #     num_node_features=self.input_size,
+        #     hidden_size=400,
+        # )
 
     def encode_timestamps(self, timestamps: torch.Tensor) -> torch.Tensor:
         """
@@ -167,25 +178,42 @@ class TSEncoder(nn.Module):
 
         """
 
+        # X = X.swapaxes(1, 2)
+
+        # h_t = []
+        # for j in range(self.num_features):
+        #     xj = X[:, :, j].unsqueeze(-1)
+        #     if self.time_encoder is not None:
+        #         encoded_timestamps = self.encode_timestamps(timestamps)
+        #         xj = torch.concat(
+        #             [
+        #                 xj,
+        #                 encoded_timestamps,
+        #             ],
+        #             dim=-1,
+        #         )
+        #     xj = self.projections[j](xj)
+        #     h_t.append(self.encoders[j](X=xj))
+
+        # h_t = torch.stack(h_t, dim=1)
+        # h_t = self.gnn(h_t)
+
         X = X.swapaxes(1, 2)
 
-        h_t = []
-        for j in range(self.num_features):
-            xj = X[:, :, j].unsqueeze(-1)
-            if self.time_encoder is not None:
-                encoded_timestamps = self.encode_timestamps(timestamps)
-                xj = torch.concat(
-                    [
-                        xj,
-                        encoded_timestamps,
-                    ],
-                    dim=-1,
-                )
-            xj = self.projections[j](xj)
-            h_t.append(self.encoders[j](X=xj))
+        if self.time_encoder is not None:
+            if self.time_encoding_class in ["Timestamps", "Linear", "Time2Vec"]:
+                timestamps = min_max_norm(timestamps)
 
-        h_t = torch.stack(h_t, dim=1)
-        h_t = self.gnn(h_t)
+            if self.unsqueeze_timestamps:
+                timestamps = timestamps.unsqueeze(-1)
+
+            encoded_timestamps = self.time_encoder(timestamps)
+            X = torch.cat([X, encoded_timestamps], dim=-1)
+
+        X = self.projection(X)
+
+        h_t = self.encoder_wrapper(X=X)
+
         return h_t
 
 

@@ -8,6 +8,7 @@ import pickle
 from models.time_encoders import PositionalEncoding
 from pre_process_node.rocket import apply_rocket
 from torch_geometric.data import Data
+import random
 
 
 def sample_random_t_inference(
@@ -199,20 +200,6 @@ class TorchDataset:
         test_dataset.n_instances = test_dataset.X.shape[0]
 
         return train_dataset, test_dataset
-
-    def create_graph(
-        self, data: torch.Tensor, timestamps: torch.Tensor, y: torch.Tensor
-    ) -> Data:
-        timestamps = timestamps.unsqueeze(0)
-        edge_index = (
-            torch.tensor(
-                [[i, i + 1] for i in range(data.shape[0] - 1)], dtype=torch.long
-            )
-            .t()
-            .contiguous()
-        )
-
-        return Data(x=data, edge_index=edge_index, timestamps=timestamps, y=y)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 

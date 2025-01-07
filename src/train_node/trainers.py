@@ -1,5 +1,5 @@
 from dataset.datasets import TorchDataset
-from torch_geometric.loader import DataLoader
+from torch.utils.data import DataLoader
 from torch.optim import Adam, Optimizer
 from typing import Any
 import torch.nn as nn
@@ -7,7 +7,37 @@ import pathlib
 import torch
 from tqdm import tqdm
 import numpy as np
-from torch_geometric.data import Data
+import random
+
+
+def create_training_nan_mask(x_i: torch.Tensor) -> torch.Tensor:
+    per_nan = random.randint(0, 80) / 100
+    num_nan = int(per_nan * x_i.shape[-1])
+    timestamps = range(x_i.shape[-1])
+    nan_points = random.sample(timestamps, num_nan)
+    nan_mask = [False if i in nan_points else True for i in timestamps]
+
+    return nan_mask
+
+
+def collate_fn_md(data: list) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Collate function for the TorchDataset.
+
+    Args:
+        data (list[tuple[torch.Tensor, torch.Tensor]]): The data to be collated.
+
+    Returns:
+        tuple[torch.Tensor, torch.Tensor, torch.Tensor]: The collated data.
+    """
+    X, timestamps, y = zip(*data)
+    X = torch.stack(X)
+    timestamps = torch.stack(timestamps)
+    y = torch.stack(y)
+
+    nan_mask = create_training_nan_mask(X)
+
+    return X[:, :, nan_mask], timestamps[:, nan_mask], y
 
 
 def save_model(model, outputfile: pathlib.Path):
@@ -153,6 +183,7 @@ class TorchTrainer:
             dataset=train_dataset,
             batch_size=batch_size,
             num_workers=num_workers,
+            collate_fn=collate_fn_md,
             shuffle=True,
             drop_last=True,
         )
