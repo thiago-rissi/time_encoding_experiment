@@ -178,10 +178,10 @@ class TorchTrainer:
         self.model.to(device_)
 
         train_dataset, validation_dataset = dataset.split_dataset(0.9)
-
+        batch_size_new = max(len(train_dataset) // 40, batch_size)
         train_dataloader = DataLoader(
             dataset=train_dataset,
-            batch_size=batch_size,
+            batch_size=batch_size_new,
             num_workers=num_workers,
             collate_fn=collate_fn_md,
             shuffle=True,

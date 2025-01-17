@@ -54,12 +54,12 @@ if __name__ == "__main__":
     elif model == "transformer":
         models = [
             "Transformer",
-            # "TransformerTimestamps",
+            "TransformerTimestamps",
             # "TransformerTimestampsRel",
-            # "TransformerTime2Vec",
+            "TransformerTime2Vec",
             "TransformerPE",
-            # "TransformerTPE",
-            # "TransformerLinear",
+            "TransformerTPE",
+            "TransformerLinear",
             # "TransformerTime2VecRel",
             # "TransformerPERel",
             # "TransformerTPERel",

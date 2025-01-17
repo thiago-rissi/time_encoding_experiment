@@ -201,6 +201,21 @@ class TorchDataset:
 
         return train_dataset, test_dataset
 
+    def differentiate_timeseries(self, X: torch.Tensor) -> torch.Tensor:
+        """
+        Differentiate the time series data.
+
+        Args:
+            X (torch.Tensor): The input data.
+
+        Returns:
+            torch.Tensor: The differentiated data.
+        """
+        X_shifted = X.roll(shifts=1, dims=-1)
+        X_diff = X_shifted - X
+        X_diff[:, 0] = 0.0
+        return X_diff
+
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
 
         t_inf = 0.0
