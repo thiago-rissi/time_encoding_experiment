@@ -230,4 +230,6 @@ class TorchDataset:
 
         ids = torch.where(~torch.isnan(x_i[0]))[0]
 
+        x_i = self.differentiate_timeseries(x_i)
+
         return x_i[:, ids], self.timestamps[ids] - t_inf, y_i

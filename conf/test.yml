@@ -17,18 +17,18 @@ datasets:
   - ArticularyWordRecognition
   - BasicMotions
   - Cricket
-  - ERing
-  - Epilepsy
-  - Heartbeat
-  - JapaneseVowels
-  - LSST
-  - Libras
-  - NATOPS
-  - PEMS-SF
-  - RacketSports
-  - SelfRegulationSCP1
-  - SpokenArabicDigits
-  - UWaveGestureLibrary
+  # - ERing
+  # - Epilepsy
+  # - Heartbeat
+  # - JapaneseVowels
+  # - LSST
+  # - Libras
+  # - NATOPS
+  # - PEMS-SF
+  # - RacketSports
+  # - SelfRegulationSCP1
+  # - SpokenArabicDigits
+  # - UWaveGestureLibrary
 
 models:
   # - RNN
@@ -42,13 +42,13 @@ models:
   # - RNNLinearRel
   # - RNNTimestamps
   # - RNNTimestampsRel
-  - TransformerTimestamps
-  # - TransformerTimestampsRel
+  # - TransformerTimestamps
   - Transformer
-  - TransformerTime2Vec
-  - TransformerPE
-  - TransformerTPE
-  - TransformerLinear
+  # - TransformerTime2Vec
+  # - TransformerPE
+  # - TransformerTPE
+  # - TransformerLinear
+  # - TransformerTimestampsRel
   # - TransformerTime2VecRel
   # - TransformerPERel
   # - TransformerTPERel

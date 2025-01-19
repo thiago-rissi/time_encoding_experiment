@@ -43,13 +43,13 @@ models:
   # - RNNLinearRel
   # - RNNTimestamps
   # - RNNTimestampsRel
-  - TransformerTimestamps
-  # - TransformerTimestampsRel
+  # - TransformerTimestamps
   - Transformer
-  - TransformerTime2Vec
-  - TransformerPE
-  - TransformerTPE
-  - TransformerLinear
+  # - TransformerTime2Vec
+  # - TransformerPE
+  # - TransformerTPE
+  # - TransformerLinear
+  # - TransformerTimestampsRel
   # - TransformerTime2VecRel
   # - TransformerPERel
   # - TransformerTPERel
@@ -66,7 +66,7 @@ torch_trainer:
     batch_size: 16
     early_stop: true
     tol: 1e-3
-    lr: 5e-4
+    lr: 1e-4
     patience: 100
     snapshot_interval: 50
     base_path: data/models

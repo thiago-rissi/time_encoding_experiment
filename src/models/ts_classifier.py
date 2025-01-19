@@ -126,7 +126,8 @@ class TSEncoder(nn.Module):
             **time_encoding,
         )
 
-        self.norm = nn.LayerNorm(num_features + self.time_encoding_size)
+        # self.norm = nn.LayerNorm(num_features + self.time_encoding_size)
+        self.norm = nn.LayerNorm(self.input_size)
         # self.encoders = nn.ModuleList(
         #     [
         #         encoder_class(
@@ -212,8 +213,9 @@ class TSEncoder(nn.Module):
             encoded_timestamps = self.time_encoder(timestamps)
             X = torch.cat([X, encoded_timestamps], dim=-1)
 
-        X = self.norm(X)
+        # X = self.norm(X)
         X = self.projection(X)
+        X = self.norm(X)
         h_t = self.encoder_wrapper(X=X)
 
         return h_t

@@ -14,8 +14,8 @@ from sklearn.metrics import (
 base_path = pathlib.Path(
     "C:\\Users\\thiag\\Desktop\\time_encoding_experiment\\data\\outputs"
 )
-pmiss = 0
-model = "transformer"
+pmiss = 70
+model = "rnn"
 metric_name = "f1_score"
 
 datasets = [
@@ -55,15 +55,15 @@ if __name__ == "__main__":
         models = [
             "Transformer",
             "TransformerTimestamps",
-            # "TransformerTimestampsRel",
+            "TransformerTimestampsRel",
             "TransformerTime2Vec",
             "TransformerPE",
             "TransformerTPE",
             "TransformerLinear",
-            # "TransformerTime2VecRel",
-            # "TransformerPERel",
-            # "TransformerTPERel",
-            # "TransformerLinearRel",
+            "TransformerTime2VecRel",
+            "TransformerPERel",
+            "TransformerTPERel",
+            "TransformerLinearRel",
         ]
 
     df = gather_metric_cd(
