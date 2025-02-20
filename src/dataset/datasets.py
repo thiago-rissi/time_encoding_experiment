@@ -9,6 +9,7 @@ from models.time_encoders import PositionalEncoding
 from pre_process_node.rocket import apply_rocket
 from torch_geometric.data import Data
 import random
+from sklearn.preprocessing import StandardScaler
 
 
 def sample_random_t_inference(
@@ -133,7 +134,7 @@ class TorchDataset:
         device: torch.device,
         time_encoding_strategy: str,
         training: bool = False,
-        normalize: bool = False,
+        normalize: bool = True,
         statistics: dict | None = None,
     ) -> None:
 
@@ -142,12 +143,13 @@ class TorchDataset:
         self.dataset_path = dataset_path
         self.dataset_name = dataset_name
 
-        self.normalize = normalize
-
         X, y = load_from_ts_file(str(dataset_path))
         metadata = get_dataset_metadata(dataset_name)
 
         X = torch.tensor(X, device=device, dtype=torch.float32)
+        if normalize:
+            X = self.normalize_data(X)
+        self.normalize = normalize
 
         self.n_instances = X.shape[0]
         self.n_variables = X.shape[1]
@@ -161,6 +163,15 @@ class TorchDataset:
         self.nan_strategy = nan_strategy
         self.time_encoding_strategy = time_encoding_strategy
         self.training = training
+
+    def normalize_data(self, X: torch.Tensor) -> None:
+        shape = X.shape
+        X_mean = X.reshape(shape[1], shape[-1] * shape[0])
+        mean = X_mean.mean(dim=-1, keepdim=True)
+        std = X_mean.std(dim=-1, keepdim=True)
+        X = (X - mean) / std
+
+        return X
 
     def __len__(self) -> int:
         return self.n_instances
@@ -228,8 +239,14 @@ class TorchDataset:
         x_i = self.X[idx]
         y_i = self.y[idx]
 
-        ids = torch.where(~torch.isnan(x_i[0]))[0]
+        # x_i = self.differentiate_timeseries(x_i)
 
-        x_i = self.differentiate_timeseries(x_i)
+        # if self.training:
+        #     self.timestamps = torch.randperm(self.t_length, device=self.device)
+        #     x_i = x_i[:, self.timestamps]
 
-        return x_i[:, ids], self.timestamps[ids] - t_inf, y_i
+        # ids = torch.where(~torch.isnan(x_i[0]))[0]
+        ids = torch.where(torch.isnan(x_i[0]))[0]
+        x_i[:, ids] = 0.0
+        return x_i, self.timestamps - t_inf, y_i
+        # return x_i[:, ids], self.timestamps[ids] - t_inf, y_i

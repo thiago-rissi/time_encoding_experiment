@@ -44,9 +44,12 @@ models:
   # - RNNTimestamps
   # - RNNTimestampsRel
   # - TransformerTimestamps
-  - Transformer
+  # - Transformer
   # - TransformerTime2Vec
   # - TransformerPE
+  # - TCN
+  - TCNTime2Vec
+  - TCNPE
   # - TransformerTPE
   # - TransformerLinear
   # - TransformerTimestampsRel

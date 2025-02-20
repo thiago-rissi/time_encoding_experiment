@@ -20,7 +20,7 @@ def create_training_nan_mask(x_i: torch.Tensor) -> torch.Tensor:
     return nan_mask
 
 
-def collate_fn_md(data: list) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def missing_collate(data: list) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Collate function for the TorchDataset.
 
@@ -183,7 +183,7 @@ class TorchTrainer:
             dataset=train_dataset,
             batch_size=batch_size_new,
             num_workers=num_workers,
-            collate_fn=collate_fn_md,
+            # collate_fn=collate_fn_md,
             shuffle=True,
             drop_last=True,
         )

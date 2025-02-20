@@ -7,6 +7,45 @@ Encoder:
 Decoder:
   hidden_size: 400
 
+TCN:
+  torch: true
+  test_nan: true
+  encoder_class: TCNEncoder
+  time_encoding:
+    time_encoding_class: null
+    strategy: absolute
+    time_encoding_size: 0
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  kernal_size: 3
+  num_channels: [3, 6, 9]
+
+TCNTime2Vec:
+  torch: true
+  test_nan: true
+  encoder_class: TCNEncoder
+  time_encoding:
+    time_encoding_class: Time2Vec
+    strategy: t2v
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  kernal_size: 3
+  num_channels: [3, 6, 9]
+
+TCNPE:
+  torch: true
+  test_nan: true
+  encoder_class: TCNEncoder
+  time_encoding:
+    time_encoding_class: PositionalEncoding
+    strategy: absolute
+    time_encoding_size: 100
+    dropout: 0.1
+  decoder_class: LinearDecoder
+  kernal_size: 3
+  num_channels: [3, 6, 9]
+
 RNN:
   torch: true
   test_nan: true

@@ -10,6 +10,7 @@ from torch.nn import GRU, TransformerEncoder, TransformerEncoderLayer
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.data import Data
+from pytorch_tcn import TCN
 
 
 class TransformerTorch(nn.Module):
@@ -170,3 +171,26 @@ class GNN(torch.nn.Module):
         h = self.conv2(x, edge_index)
         h = h.view(batch_size, num_nodes, -1)
         return h[:, -1, :]
+
+
+class TCNEncoder(nn.Module):
+    def __init__(
+        self,
+        input_size: int,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+        self.encoder = TCN(
+            num_inputs=input_size,
+            num_channels=[3, 9, 27],
+            kernel_size=3,
+            input_shape="NLC",
+        )
+        self.flatten = nn.Flatten()
+        self.linear = nn.LazyLinear(400)
+
+    def forward(self, X: torch.Tensor) -> torch.Tensor:
+        X_encoded = self.encoder(X)
+        X_flattened = self.flatten(X_encoded)
+        X_linear = self.linear(X_flattened)
+        return X_linear

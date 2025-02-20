@@ -1,4 +1,4 @@
 modules:
   # - pre_process
-  - train
+  # - train
   - test
